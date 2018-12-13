@@ -1,0 +1,11 @@
+---
+- hosts: neo2
+  vars:
+    ROOT_PWD: '$6$HaRd/fGf3RVZ2RFt$7w3mu0B6gAjNLEqVgqWRwpiCKV/I4LqGoKva5jJ1gj/QVg1oJ.A3XGEYCg.8W1vrTdYFPAU0z41Rr4Y77tqY2/'
+  remote_user: pragtich
+  tasks:
+  - name: Set a better pwd for root
+    user:
+      name:      root
+      password:  "{{ ROOT_PWD }}"
+    
