@@ -45,10 +45,7 @@
       line: '%wheel ALL=(ALL) NOPASSWD: ALL'
       validate: 'visudo -cf %s'
 
-  - name: Set up authorized keys for the deployer user
-    authorized_key: user=deployer key="{{item}}"
-    with_file:
-      - /home/railsdev/.ssh/id_rsa.pub
+
 # - name: "Do the rest from my own account"
 #   hosts: neo2
 #   remote_user: pragtich
