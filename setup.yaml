@@ -7,16 +7,29 @@
     PR8_USER: pragtich
     PR8_USER_PWD: '$6$dq7WwWEFcnLfDKng$DpPNBmBjtl9OApwHwa5hlD97kg3WfaJVXIbUWxadVtYPJZjREBBBcGNxEfNyQZHn0J9KRbD8DENLDUyHyzbiQ/'
     PR8_SHELL: "/bin/bash"
+    PR8_KEYS:
+      - ~/.ssh/id_rsa.pub
   tasks:
   - name: Set a better pwd for root
     user:
       name:        root
       password:    "{{ PR8_ROOT_PWD }}"
+  - name: Make sure we have a 'wheel' group
+    group:
+      name: wheel
+      state: present
   - name: Add a user for myself
     user:
       name:        "{{ PR8_USER }}"
       password:    "{{ PR8_USER_PWD }}"
       shell:       "{{ PR8_SHELL }}"
+      groups:      wheel
+      append:      yes
+  - name: Allow key login for my user
+    authorized_key:
+      user: "{{ PR8_USER }}"
+      key: "{{ lookup('file', item) }}"
+    with_items: "{{ PR8_KEYS }}"
   - name: Disable unused accounts
     user:
       name: "{{ item }}"
@@ -24,4 +37,22 @@
     with_items:
       - pi
       - fa
-#- name: "Do the rest from my own account"
+  - name: Allow 'wheel' group to have passwordless sudo
+    lineinfile:
+      dest: /etc/sudoers
+      state: present
+      regexp: '^%wheel'
+      line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+      validate: 'visudo -cf %s'
+
+  - name: Set up authorized keys for the deployer user
+    authorized_key: user=deployer key="{{item}}"
+    with_file:
+      - /home/railsdev/.ssh/id_rsa.pub
+# - name: "Do the rest from my own account"
+#   hosts: neo2
+#   remote_user: pragtich
+#   tasks:
+#     - name: test
+      
+      
