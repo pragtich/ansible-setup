@@ -15,6 +15,11 @@
     PR8_SHELL: "/bin/bash"
     PR8_KEYS:
       - ~/.ssh/id_rsa.pub
+  handlers:
+    - name: Restart sshd
+      service:
+        name:  ssh
+        state: restarted
   tasks:
   - name: Set a better pwd for root
     user:
@@ -50,3 +55,17 @@
       regexp: '^%wheel'
       line: '%wheel ALL=(ALL) NOPASSWD: ALL'
       validate: 'visudo -cf %s'
+  - name: Disable password SSH login
+    lineinfile:
+      dest:   /etc/ssh/sshd_config
+      regexp: "^PasswordAuthentication"
+      line:   "PasswordAuthentication no"
+      state:  present
+    notify:   Restart sshd
+  - name: Disable root loging over SSH
+    lineinfile:
+      dest:   /etc/ssh/sshd_config
+      regexp: "^PermitRootLogin"
+      line:   "PermitRootLogin no"
+      state:  present
+    notify:   Restart sshd
