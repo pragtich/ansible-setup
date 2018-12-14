@@ -17,6 +17,9 @@
       password:    "{{ PR8_USER_PWD }}"
   - name: Disable unused accounts
     user:
-      name: pi
-      password: ! 
+      name: "{{ item }}"
+      password: '*'
+    with_items:
+      - pi
+      - fa
 #- name: "Do the rest from my own account"
