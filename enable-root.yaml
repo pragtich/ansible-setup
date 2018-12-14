@@ -1,0 +1,29 @@
+---
+# Re-enables SSH root login
+# Mainly used when setup.yaml has been updated
+
+- name: Re-enable root login over SSH
+  hosts: neo2
+  remote_user: pragtich
+  handlers:
+    - name: Restart sshd
+      service:
+        name:  ssh
+        state: restarted
+  become: yes
+  tasks:
+    - name: Re-enable password login
+      lineinfile:
+        dest:   /etc/ssh/sshd_config
+        regexp: "^PasswordAuthentication"
+        line:   "PasswordAuthentication yes"
+        state:  present
+      notify:   Restart sshd
+    - name: Enable root loging over SSH
+      lineinfile:
+        dest:   /etc/ssh/sshd_config
+        regexp: "^PermitRootLogin"
+        line:   "PermitRootLogin yes"
+        state:  present
+      notify:   Restart sshd
+      
