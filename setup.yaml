@@ -6,6 +6,7 @@
     PR8_ROOT_PWD: '$6$HaRd/fGf3RVZ2RFt$7w3mu0B6gAjNLEqVgqWRwpiCKV/I4LqGoKva5jJ1gj/QVg1oJ.A3XGEYCg.8W1vrTdYFPAU0z41Rr4Y77tqY2/'
     PR8_USER: pragtich
     PR8_USER_PWD: '$6$dq7WwWEFcnLfDKng$DpPNBmBjtl9OApwHwa5hlD97kg3WfaJVXIbUWxadVtYPJZjREBBBcGNxEfNyQZHn0J9KRbD8DENLDUyHyzbiQ/'
+    PR8_SHELL: "/bin/bash"
   tasks:
   - name: Set a better pwd for root
     user:
@@ -15,6 +16,7 @@
     user:
       name:        "{{ PR8_USER }}"
       password:    "{{ PR8_USER_PWD }}"
+      shell:       "{{ PR8_SHELL }}"
   - name: Disable unused accounts
     user:
       name: "{{ item }}"
