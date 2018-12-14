@@ -1,0 +1,36 @@
+---
+# Configuration of the system
+# This is done using the newly created settings from the setup.yaml
+# Split, because setup.yaml needs root login and we disable that as the last step
+- name: "Configure the system"
+  hosts: neo2
+  remote_user: pragtich
+  become: yes
+  handlers:
+    - name: Restart sshd
+      service:
+        name:  ssh
+        state: restarted
+  tasks:
+    - name: Disable password SSH login
+      lineinfile:
+        dest:   /etc/ssh/sshd_config
+        regexp: "^PasswordAuthentication"
+        line:   "PasswordAuthentication no"
+        state:  present
+      notify:   Restart sshd
+    - name: Disable root loging over SSH
+      lineinfile:
+        dest:   /etc/ssh/sshd_config
+        regexp: "^PermitRootLogin"
+        line:   "PermitRootLogin no"
+        state:  present
+      notify:   Restart sshd
+      
+    - name: apt upgrade
+      apt:
+        update_cache:     yes
+        cache_valid_time: 3600
+        upgrade:          safe
+    
+      
