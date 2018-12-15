@@ -18,4 +18,8 @@
         cache_valid_time: 3600
         upgrade:          safe
     
-      
+    - name: Install python 3 and HA requirements
+      apt:
+        name:
+           - python3
+        state: present
