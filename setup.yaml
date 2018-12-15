@@ -25,16 +25,18 @@
     user:
       name:        root
       password:    "{{ PR8_ROOT_PWD }}"
-  - name: Make sure we have a 'wheel' group
-    group:
-      name: wheel
-      state: present
+#  - name: Make sure we have a 'wheel' group
+#    group:
+#      name: wheel
+#      state: present
   - name: Add a user for myself
     user:
       name:        "{{ PR8_USER }}"
       password:    "{{ PR8_USER_PWD }}"
       shell:       "{{ PR8_SHELL }}"
-      groups:      wheel
+      groups:
+        - sudo
+        - dialout
       append:      yes
   - name: Allow key login for my user
     authorized_key:
@@ -48,13 +50,13 @@
     with_items:
       - pi
       - fa
-  - name: Allow 'wheel' group to have passwordless sudo
-    lineinfile:
-      dest: /etc/sudoers
-      state: present
-      regexp: '^%wheel'
-      line: '%wheel ALL=(ALL) NOPASSWD: ALL'
-      validate: 'visudo -cf %s'
+#  - name: Allow 'wheel' group to have passwordless sudo
+#    lineinfile:
+#      dest: /etc/sudoers
+#      state: present
+#      regexp: '^%wheel'
+#      line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+#      validate: 'visudo -cf %s'
   - name: Disable password SSH login
     lineinfile:
       dest:   /etc/ssh/sshd_config
