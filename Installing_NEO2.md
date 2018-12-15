@@ -69,6 +69,57 @@ SSH password:
 - [ ] Get profile tips from existing templates
 - [ ] Drop my profiles into place
 - [ ] Install HomeAssistant
+
+After some depreciation warnings, this seems to be the recommended way at present:
+```
+    - name: Install python 3 and HA requirements
+      apt:
+        name:
+           - python3
+        state: present
+```
+
+Following [the RPi instructions on the HA site](https://www.home-assistant.io/docs/installation/raspberry-pi/), but with the following changes:
+
+- Not making a separate folder, just using `/home/homeassistant`.
+- `RuntimeError: aiohttp 3.x requires Python 3.5.3+`
+
+```shell
+$ python3 --version
+Python 3.5.2
+```
+
+In order to force a newer Python version to be installed, we need to go outside of Ubuntu's defaults. 
+
+Let's add the `deadsnakes` PPA:
+
+```
+    - name: Add deadsnakes to get newer Python
+      apt_repository:
+        repo: ppa:deadsnakes/ppa
+```
+
+And install a fixed version of Python. I have not managed to find a way to pin the version other than this one. This does mean, that we will not be automatically upgraded beyond version `3.7`.
+
+```
+    - name: Install python 3 and HA requirements
+      apt:
+        name:
+           - python3.7
+           - python3.7-venv
+           - python3-pip
+        state: present
+```
+
+TODO:
+I manually upgraded PIP:
+
+```shell
+python3.7 -m pip install --upgrade pip
+```
+
+How to do this using ansible??
+
 - [ ] Configure HA?
 - [ ] Backups
 - [ ] Stop publishing hashes on Github

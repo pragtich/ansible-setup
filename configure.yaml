@@ -11,15 +11,43 @@
   become: yes
 
   tasks:
-      
+    - name: Add deadsnakes to get newer Python
+      apt_repository:
+        repo: ppa:deadsnakes/ppa
     - name: apt upgrade
       apt:
         update_cache:     yes
         cache_valid_time: 3600
         upgrade:          safe
-    
+  
     - name: Install python 3 and HA requirements
       apt:
         name:
-           - python3
+           - python3.7
+           - python3.7-venv
+           - python3-pip
         state: present
+    - name: Update pip
+      pip:
+        name: pip
+        state: latest
+        
+    - name: Install homeassistant user
+      user:
+        name: homeassistant
+        system: yes
+        create_home: yes
+        password: "*" # Disabled login
+        shell: "/bin/bash"
+        groups:
+          - dialout
+        append: yes
+    - name: Create virtual environment
+      become_user: homeassistant
+      become: yes
+      pip:
+        virtualenv: "~/"
+        virtualenv_command: /usr/bin/python3 -m venv
+        name:
+          - wheel
+          - homeassistant
