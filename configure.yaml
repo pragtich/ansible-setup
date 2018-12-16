@@ -25,12 +25,11 @@
         name:
            - python3.7
            - python3.7-venv
+           - python3.7-dev
            - python3-pip
+           - libffi-dev
+           - libssl-dev
         state: present
-    - name: Update pip
-      pip:
-        name: pip
-        state: latest
         
     - name: Install homeassistant user
       user:
@@ -46,8 +45,23 @@
       become_user: homeassistant
       become: yes
       pip:
-        virtualenv: "~/"
-        virtualenv_command: /usr/bin/python3 -m venv
+        virtualenv: "~/ha"
+        virtualenv_command: pyvenv-3.7
+#        virtualenv_python: python3.7
+        state: latest
         name:
+          - pip
+          - setuptools
+          #- wheel
+          #- homeassistant
+    - name: Create virtual environment
+      become_user: homeassistant
+      become: yes
+      pip:
+        virtualenv: "~/ha"
+        virtualenv_command: pyvenv-3.7
+#        virtualenv_python: python3.7
+        name:
+          #- pip
           - wheel
           - homeassistant
