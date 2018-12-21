@@ -9,9 +9,10 @@ Will I regret that?
 
 `10.0.0.204`
 
-- [ ] Add IP address to hosts/inventory file (`ansible-setup/hosts`)
+- [x] Add IP address to hosts/inventory file (`ansible-setup/hosts`)
 
 ```
+[neo2]
 10.0.0.204
 ```
 
@@ -26,7 +27,7 @@ SSH password:
 
 -k to ask for root password (`fa` by default)
 
-- [ ] Change root pwd
+- [x] Change root pwd
 
 [The ansible FAQ explains a bit](https://docs.ansible.com/ansible/latest/reference_appendices/faq.html#how-do-i-generate-crypted-passwords-for-the-user-module).
 
@@ -59,16 +60,20 @@ SSH password:
 }
 ```
 
-- [ ] Set hostname
+- [x] Set hostname
 - [x] Disable the unwanted user names
 - [x] Create my user (wheel), test sudo
 - [x] Copy ssh keys
-- [ ] Also make sure the keys are backed up
+- [x] Also make sure the keys are backed up. 
+
+Not really necessary: I am using my own personal keys.
+
 - [x] Disable password login for all
 - [x] Update packages
 - [ ] Get profile tips from existing templates
-- [ ] Drop my profiles into place
-- [ ] Install HomeAssistant
+- [x] Drop my profiles into place
+- [x] Install HomeAssistant
+- [ ] Don't put security sensitive stuff into github
 
 After some depreciation warnings, this seems to be the recommended way at present:
 ```
@@ -122,8 +127,19 @@ How to do this using ansible??
 
 - [ ] Configure HA?
 - [ ] Backups
-- [ ] Stop publishing hashes on Github
-- [ ] Move this file to Github
+
+```shell
+
+$ rsync -av -e ssh  / pragtich@trapkast:Backup-Neo2
+
+```
+
+Crontab?
+
+
+
+- [x] Move this file to Github
+- [ ] Investigate using Roles
 
 # Structure
 
@@ -290,3 +306,4 @@ fi
 # set PATH so it includes user's private bin directories
 PATH="$HOME/bin:$HOME/.local/bin:$PATH"
 ```
+
