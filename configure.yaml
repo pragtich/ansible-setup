@@ -65,3 +65,14 @@
           #- pip
           - wheel
           - homeassistant
+    - name: Create systemd service for homeassistant
+      become: yes
+      copy:
+        src:   home-assistant@homeassistant.service
+        dest:  /lib/systemd/system/
+    - name: Enable homeassistant service
+      systemd:
+        name: home-assistant@homeassistant.service
+        state: started
+        enabled: yes
+        daemon_reload: yes
