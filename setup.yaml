@@ -71,3 +71,6 @@
       line:   "PermitRootLogin no"
       state:  present
     notify:   Restart sshd
+  - name: Set hostname
+    hostname:
+      name: neo2
