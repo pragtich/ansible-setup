@@ -76,3 +76,14 @@
         state: started
         enabled: yes
         daemon_reload: yes
+    - name: Get my profile dotfiles
+      become_user: pragtich
+      git:
+        repo: 'https://github.com/pragtich/dotfiles.git'
+        dest: '~/.dotfiles'
+    - name: Install my profile dotfiles
+      become_user: pragtich
+      shell: ~/.dotfiles/install.sh
+      args:
+        chdir: ~/.dotfiles/
+        
