@@ -34,10 +34,17 @@
       name:        "{{ PR8_USER }}"
       password:    "{{ PR8_USER_PWD }}"
       shell:       "{{ PR8_SHELL }}"
+      generate_ssh_key: yes
       groups:
         - sudo
         - dialout
       append:      yes
+  - name: Make a local copy of the private key
+    become_user: "{{ PR8_USER }}"
+    become: yes
+    fetch:
+      src: ~/.ssh/id_rsa.pub
+      dest: "{{ ansible_hostname }}_key.pub"
   - name: Allow key login for my user
     authorized_key:
       user: "{{ PR8_USER }}"
