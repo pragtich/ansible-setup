@@ -88,12 +88,13 @@
       args:
         chdir: ~/.dotfiles/
         
-- name: Enable saving to network servers
-  hosts: backup
-  vars:
-    BACKUP_USER:   pragtich
-  tasks:
-  - name: Transfer ssh public ID to backup
-    authorized_key:
-      user: "{{ BACKUP_USER }}"
-      key: "{{ lookup('file', neo2_key.pub }}"
+# - name: Enable saving to network servers
+#   hosts: backup
+#   vars:
+#     BACKUP_USER:   pragtich
+#   tasks:
+#   - name: Transfer ssh public ID to backup
+#     authorized_key:
+#       user: "{{ BACKUP_USER }}"
+#       key: "{{ lookup('file', neo2_key.pub }}"
+
