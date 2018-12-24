@@ -81,9 +81,19 @@
       git:
         repo: 'https://github.com/pragtich/dotfiles.git'
         dest: '~/.dotfiles'
+        force: yes
     - name: Install my profile dotfiles
       become_user: pragtich
       shell: ~/.dotfiles/install.sh
       args:
         chdir: ~/.dotfiles/
         
+- name: Enable saving to network servers
+  hosts: backup
+  vars:
+    BACKUP_USER:   pragtich
+  tasks:
+  - name: Transfer ssh public ID to backup
+    authorized_key:
+      user: "{{ BACKUP_USER }}"
+      key: "{{ lookup('file', neo2_key.pub }}"
