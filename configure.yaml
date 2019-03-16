@@ -87,7 +87,12 @@
       shell: ~/.dotfiles/install.sh
       args:
         chdir: ~/.dotfiles/
-        
+    - name: Install homeassistant configuration
+      copy:
+        src:  "{{ item }}"
+        dest: /home/homeassistant/.homeassistant/
+      with_fileglob:
+        - ha-config/*.yaml
 # - name: Enable saving to network servers
 #   hosts: backup
 #   vars:
