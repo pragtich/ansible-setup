@@ -9,7 +9,7 @@
   hosts: neo2
   remote_user: root
   vars_files:
-    - pr8_vault.yaml
+    - pr8-vault.yaml
   vars:
     PR8_USER: pragtich
     PR8_SHELL: "/bin/bash"
