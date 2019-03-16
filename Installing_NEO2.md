@@ -203,6 +203,43 @@ $ ansible-playbook -i hosts configure.yaml
 $ ansible-playbook -i hosts  enable-root.yaml
 ```
 
+# Move passwords to a vault
+
+```shell
+ansible-vault create pr8-vault.yaml
+```
+
+Come up with a decent password and when the `EDITOR` is opened, put in the first variables:
+
+```yaml
+    PR8_USER_PWD: 'XXXYYYZZZ'
+	PR8_ROOT_PWD: 'ZZZYYYXXX'
+```
+
+Edit the `setup.yaml` to remove the above variable definitions, but instead add next to the `vars` definition:
+
+```yaml
+vars_files:
+  - pr8-vault.yaml
+```
+
+In order to decrypt the vault, the command lines need to change somewhat. For example:
+
+```shell
+$ ansible-playbook -i hosts  enable-root.yaml
+$ ansible-playbook -i hosts -k setup.yaml --ask-vault-pass
+```
+
+Of course, now it is time to change my passwords :-)
+
+```shell
+$ ansible-vault edit pr8-vault.yaml
+$ ansible-playbook -i hosts -k setup.yaml --ask-vault-pass
+# login with old SSH password. Will fail halfway through due to the password changing. Run it again with the new SSH pwd.
+```
+
+
+
 # Notes
 
 ## Original `.bashrc`
