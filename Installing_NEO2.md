@@ -74,6 +74,51 @@ Not really necessary: I am using my own personal keys.
 - [x] Drop my profiles into place
 - [x] Install HomeAssistant
 - [ ] Don't put security sensitive stuff into github
+- [ ] Move homeassistant `configuration.yaml` into ansible
+- [ ] Debug mysensors presentations
+
+
+## Understanding Mysensors presentation issue
+
+Homeassistant log below. 
+
+It is trying to send a presentation request, but it never gets sent out.
+
+```
+Dec 26 14:05:53 neo2 hass[560]: 2018-12-26 14:05:53 DEBUG (MainThread) [mysensors] Receiving 0;255;3;0;2;2.3.1-beta
+Dec 26 14:05:57 neo2 hass[560]: 2018-12-26 14:05:57 DEBUG (MainThread) [mysensors] Receiving 12;255;3;0;33;300000
+Dec 26 14:05:58 neo2 hass[560]: 2018-12-26 14:05:58 DEBUG (MainThread) [mysensors] Receiving 12;1;1;0;16;0
+Dec 26 14:05:58 neo2 hass[560]: 2018-12-26 14:05:58 WARNING (MainThread) [mysensors] Node 12 is unknown
+Dec 26 14:05:58 neo2 hass[560]: 2018-12-26 14:05:58 INFO (MainThread) [mysensors] Requesting new presentation for node 12
+Dec 26 14:05:58 neo2 hass[560]: 2018-12-26 14:05:58 DEBUG (MainThread) [mysensors] Sending 12;255;3;0;19;
+Dec 26 14:06:02 neo2 hass[560]: 2018-12-26 14:06:02 DEBUG (MainThread) [mysensors] Sending 0;255;3;0;2;
+Dec 26 14:06:03 neo2 hass[560]: 2018-12-26 14:06:03 DEBUG (MainThread) [mysensors] Receiving 0;255;3;0;2;2.3.1-beta
+Dec 26 14:06:13 neo2 hass[560]: 2018-12-26 14:06:13 DEBUG (MainThread) [mysensors] Sending 0;255;3;0;2;
+Dec 26 14:06:13 neo2 hass[560]: 2018-12-26 14:06:13 DEBUG (MainThread) [mysensors] Receiving 0;255;3;0;2;2.3.1-beta
+Dec 26 14:06:23 neo2 hass[560]: 2018-12-26 14:06:23 DEBUG (MainThread) [mysensors] Sending 0;255;3;0;2;
+```
+
+The gateway log:
+No presentation request seen. Is this Smartsleep messing things up or what is going on?
+
+```
+0;255;3;0;2;2.3.1-beta
+0;255;3;0;2;2.3.1-beta
+0;255;3;0;2;2.3.1-beta
+0;255;3;0;2;2.3.1-beta
+0;255;3;0;2;2.3.1-beta
+0;255;3;0;2;2.3.1-beta
+12;255;3;0;33;300000
+12;1;1;0;16;0
+0;255;3;0;2;2.3.1-beta
+0;255;3;0;2;2.3.1-beta
+0;255;3;0;2;2.3.1-beta
+0;255;3;0;2;2.3.1-beta
+0;255;3;0;2;2.3.1-beta
+```
+
+
+
 
 After some depreciation warnings, this seems to be the recommended way at present:
 ```
