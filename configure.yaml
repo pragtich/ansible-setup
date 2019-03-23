@@ -93,6 +93,19 @@
         dest: /home/homeassistant/.homeassistant/
       with_fileglob:
         - ha-config/*.yaml
+
+    - name: Get my OLED driver code
+      become_user: pragtich
+      git:
+        repo: 'https://github.com/pragtich/NanoHatOLED.git'
+        force: yes
+        dest: '~/NanoHatOLED'
+    - name: Install my OLED driver
+      become: yes
+      command: install.sh
+      args:
+        chdir: '~/NanoHatOLED'
+        
 # - name: Enable saving to network servers
 #   hosts: backup
 #   vars:
