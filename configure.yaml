@@ -104,7 +104,7 @@
       become: yes
       command: install.sh
       args:
-        chdir: '~/NanoHatOLED'
+        chdir: '/home/pragtich/NanoHatOLED'
         
 # - name: Enable saving to network servers
 #   hosts: backup
