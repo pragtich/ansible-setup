@@ -9,7 +9,7 @@
   hosts: neo2
   remote_user: pragtich
   become: yes
-
+  
   tasks:
     - name: Add deadsnakes to get newer Python
       apt_repository:

@@ -4,10 +4,21 @@
 # Assumes a freshly installed FriendlyArm Ubuntu
 # Performs the first time setup which is required for a new system
 #
+# Armbian version
+# tested with Armbian 5.75 Bionic Next
+#
+# TODO: because of the login script, need to do the first login manually
+# ssh root@IP  password 1234
+# Run through the initial dialogs, then log out
+# In the process, make the PR8_USER account and give it a sensible password (matched in the vault)
 
-- name: "Do initial stuff with original root account"
+# TODO: https://docs.ansible.com/ansible/become.html#becoming-an-unprivileged-user
+
+
+- name: "Do first configuration. You must run through setup manually first"
   hosts: neo2
   remote_user: root
+
   vars_files:
     - pr8-vault.yaml
   vars:
@@ -50,20 +61,21 @@
       user: "{{ PR8_USER }}"
       key: "{{ lookup('file', item) }}"
     with_items: "{{ PR8_KEYS }}"
-  - name: Disable unused accounts
-    user:
-      name: "{{ item }}"
-      password: '*'
-    with_items:
-      - pi
-      - fa
-#  - name: Allow 'wheel' group to have passwordless sudo
-#    lineinfile:
-#      dest: /etc/sudoers
-#      state: present
-#      regexp: '^%wheel'
-#      line: '%wheel ALL=(ALL) NOPASSWD: ALL'
-#      validate: 'visudo -cf %s'
+  # No unused accounts on armbian
+  # - name: Disable unused accounts
+  #   user:
+  #     name: "{{ item }}"
+  #     password: '*'
+  #   with_items:
+  #     - pi
+  #     - fa
+  - name: Allow 'sudo' group to have passwordless sudo
+    lineinfile:
+      dest: /etc/sudoers
+      state: present
+      regexp: '^%sudo'
+      line: '%sudo ALL=(ALL) NOPASSWD: ALL'
+      validate: 'visudo -cf %s'
   - name: Disable password SSH login
     lineinfile:
       dest:   /etc/ssh/sshd_config
