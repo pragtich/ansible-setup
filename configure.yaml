@@ -8,82 +8,98 @@
 - name: "Configure the system"
   hosts: neo2
   remote_user: pragtich
-  become: yes
-  
+  vars_files:
+    - pr8-vault.yaml
   tasks:
     - name: Add deadsnakes to get newer Python
+      become: yes
       apt_repository:
         repo: ppa:deadsnakes/ppa
     - name: apt upgrade
+      become: yes
       apt:
         update_cache:     yes
         cache_valid_time: 3600
         upgrade:          safe
   
     - name: Install python 3 and HA requirements
+      become: yes
       apt:
         name:
            - python3.7
            - python3.7-venv
            - python3.7-dev
            - python3-pip
+           - python3-setuptools
            - libffi-dev
            - libssl-dev
         state: present
-        
+
     - name: Install homeassistant user
+      become: yes
       user:
         name: homeassistant
         system: yes
         create_home: yes
-        password: "*" # Disabled login
+        password: "{{ HA_PWD }}" 
         shell: "/bin/bash"
+        generate_ssh_key: yes
         groups:
           - dialout
         append: yes
-    - name: Create virtual environment
-      become_user: homeassistant
+    - name: Make a local copy of the private key
+      become_user: root
       become: yes
+      fetch:
+        src: ~homeassistant/.ssh/id_rsa.pub
+        dest: "{{ ansible_hostname }}_homeassistant_key.pub"
+    - name: Allow key login for my user
+      become_user: root
+      become: yes
+      authorized_key:
+        user: "homeassistant"
+        key: "{{ lookup('file', item) }}"
+      with_items:
+         - ~/.ssh/id_rsa.pub
+    
+- name: "Homeassistant connect to create virtualenv"
+  remote_user: homeassistant
+  hosts: [neo2]
+  tasks:
+    - name: Create virtual environment
       pip:
-        virtualenv: "~/ha"
+        virtualenv: "/home/homeassistant/ha"
         virtualenv_command: pyvenv-3.7
 #        virtualenv_python: python3.7
         state: latest
         name:
           - pip
           - setuptools
-          #- wheel
-          #- homeassistant
-    - name: Create virtual environment
-      become_user: homeassistant
-      become: yes
-      pip:
-        virtualenv: "~/ha"
-        virtualenv_command: pyvenv-3.7
-#        virtualenv_python: python3.7
-        name:
-          #- pip
           - wheel
           - homeassistant
+
     - name: Create systemd service for homeassistant
-      become: yes
+      #TODO: cant I make user modules?
       copy:
         src:   home-assistant@homeassistant.service
         dest:  /lib/systemd/system/
+
     - name: Enable homeassistant service
       systemd:
         name: home-assistant@homeassistant.service
         state: started
         enabled: yes
-        daemon_reload: yes
+        #daemon_reload: yes
+- name: Drop back to reduced privileges
+  remote_user: pragtich
+  hosts: [neo2]
+  tasks:
     - name: Get my profile dotfiles
-      become_user: pragtich
       git:
         repo: 'https://github.com/pragtich/dotfiles.git'
         dest: '~/.dotfiles'
         force: yes
     - name: Install my profile dotfiles
-      become_user: pragtich
       shell: ~/.dotfiles/install.sh
       args:
         chdir: ~/.dotfiles/
@@ -95,7 +111,6 @@
         - ha-config/*.yaml
 
     - name: Get my OLED driver code
-      become_user: pragtich
       git:
         repo: 'https://github.com/pragtich/NanoHatOLED.git'
         force: yes
