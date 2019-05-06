@@ -99,9 +99,9 @@
       become: yes
       systemd:
         name: home-assistant@homeassistant.service
-        state: started
+        state: restarted
         enabled: yes
-        #daemon_reload: yes
+        daemon_reload: yes
     - name: Get my profile dotfiles
       git:
         repo: 'https://github.com/pragtich/dotfiles.git'
