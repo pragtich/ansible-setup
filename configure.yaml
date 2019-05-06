@@ -113,15 +113,17 @@
         chdir: ~/.dotfiles/
  
     - name: Get my OLED driver code
+      # TODO: Clean up the NanoHatOLED structure and make it easier to customize
+      # TODO: make this more idempotent (make my own install ?)
       git:
         repo: 'https://github.com/pragtich/NanoHatOLED.git'
         force: yes
         dest: '~/NanoHatOLED'
     - name: Install my OLED driver
       become: yes
-      command: install.sh
+      shell: /home/pragtich/NanoHatOLED/install.sh
       args:
-        chdir: '/home/pragtich/NanoHatOLED'
+        chdir: /home/pragtich/NanoHatOLED/
         
 # - name: Enable saving to network servers
 #   hosts: backup
