@@ -83,17 +83,25 @@
       copy:
         src:   home-assistant@homeassistant.service
         dest:  /lib/systemd/system/
+    - name: Install homeassistant configuration
+      copy:
+        src:  "{{ item }}"
+        dest: /home/homeassistant/.homeassistant/
+        force: yes
+      with_fileglob:
+        - ha-config/*.yaml
 
+- name: Drop back to reduced privileges
+  remote_user: pragtich
+  hosts: [neo2]
+  tasks:
     - name: Enable homeassistant service
+      become: yes
       systemd:
         name: home-assistant@homeassistant.service
         state: started
         enabled: yes
         #daemon_reload: yes
-- name: Drop back to reduced privileges
-  remote_user: pragtich
-  hosts: [neo2]
-  tasks:
     - name: Get my profile dotfiles
       git:
         repo: 'https://github.com/pragtich/dotfiles.git'
@@ -103,13 +111,7 @@
       shell: ~/.dotfiles/install.sh
       args:
         chdir: ~/.dotfiles/
-    - name: Install homeassistant configuration
-      copy:
-        src:  "{{ item }}"
-        dest: /home/homeassistant/.homeassistant/
-      with_fileglob:
-        - ha-config/*.yaml
-
+ 
     - name: Get my OLED driver code
       git:
         repo: 'https://github.com/pragtich/NanoHatOLED.git'

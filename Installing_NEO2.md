@@ -389,3 +389,9 @@ fi
 PATH="$HOME/bin:$HOME/.local/bin:$PATH"
 ```
 
+
+
+# Notes for later documentation
+
+Login to a user account from a sudo user:
+sudo -u homeassistant -H -s
