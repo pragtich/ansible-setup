@@ -14,7 +14,7 @@ homeassistant:
   customize: !include customize.yaml
 
 # Show links to resources in log and frontend
-#introduction:
+# introduction:
 
 # Enables the frontend
 frontend:
@@ -61,6 +61,8 @@ tts:
 # Cloud
 cloud:
 
+system_health:
+  
 sensor:
   - platform: yr
   - platform: time_date
