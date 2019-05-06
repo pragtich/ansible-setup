@@ -55,8 +55,8 @@ sun:
 
 
 # Text to speech
-tts:
-  - platform: google
+#tts:
+#  - platform: google
 
 # Cloud
 cloud:
