@@ -124,6 +124,15 @@
       shell: /home/pragtich/NanoHatOLED/install.sh
       args:
         chdir: /home/pragtich/NanoHatOLED/
+
+# TASK [Get my OLED driver code] *********************************************************************************************
+# task path: /Users/pragtich/Documents/NanoPi/ansible-setup/configure.yaml:115
+# fatal: [10.0.0.204]: FAILED! => {"changed": false, "cmd": "/usr/bin/git submodule foreach /usr/bin/git fetch", "msg": "error: cannot open /home/pragtich/NanoHatOLED/.git/modules/BakeBit/FETCH_HEAD: Permission denied\nStopping at 'BakeBit'; script returned non-zero status.", "rc": 1, "stderr": "error: cannot open /home/pragtich/NanoHatOLED/.git/modules/BakeBit/FETCH_HEAD: Permission denied\nStopping at 'BakeBit'; script returned non-zero status.\n", "stderr_lines": ["error: cannot open /home/pragtich/NanoHatOLED/.git/modules/BakeBit/FETCH_HEAD: Permission denied", "Stopping at 'BakeBit'; script returned non-zero status."], "stdout": "Entering 'BakeBit'\n", "stdout_lines": ["Entering 'BakeBit'"]}
+# 	to retry, use: --limit @/Users/pragtich/Documents/NanoPi/ansible-setup/configure.retry
+
+# PLAY RECAP *****************************************************************************************************************
+# 10.0.0.204                 : ok=15   changed=5    unreachable=0    failed=1
+
         
 # - name: Enable saving to network servers
 #   hosts: backup
