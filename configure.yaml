@@ -115,32 +115,30 @@
     - name: Get my OLED driver code
       # TODO: Clean up the NanoHatOLED structure and make it easier to customize
       # TODO: make this more idempotent (make my own install ?)
+      # TODO: remove superuser privileges, only needed because install.sh pulls in Bakebit as root
+      become: yes
       git:
         repo: 'https://github.com/pragtich/NanoHatOLED.git'
         force: yes
         dest: '~/NanoHatOLED'
+    - name: Install OLED prerequesites
+      become: yes
+      apt:
+        name:
+          - python-setuptools
+          - libjpeg-dev
+        state: present
+    - name: Install python requesites for OLED
+      become: yes
+      pip:
+        executable: /usr/local/bin/pip2.7
+        state: latest
+        name:
+          - Pillow
+        
     - name: Install my OLED driver
       become: yes
       shell: /home/pragtich/NanoHatOLED/install.sh
       args:
         chdir: /home/pragtich/NanoHatOLED/
-
-# TASK [Get my OLED driver code] *********************************************************************************************
-# task path: /Users/pragtich/Documents/NanoPi/ansible-setup/configure.yaml:115
-# fatal: [10.0.0.204]: FAILED! => {"changed": false, "cmd": "/usr/bin/git submodule foreach /usr/bin/git fetch", "msg": "error: cannot open /home/pragtich/NanoHatOLED/.git/modules/BakeBit/FETCH_HEAD: Permission denied\nStopping at 'BakeBit'; script returned non-zero status.", "rc": 1, "stderr": "error: cannot open /home/pragtich/NanoHatOLED/.git/modules/BakeBit/FETCH_HEAD: Permission denied\nStopping at 'BakeBit'; script returned non-zero status.\n", "stderr_lines": ["error: cannot open /home/pragtich/NanoHatOLED/.git/modules/BakeBit/FETCH_HEAD: Permission denied", "Stopping at 'BakeBit'; script returned non-zero status."], "stdout": "Entering 'BakeBit'\n", "stdout_lines": ["Entering 'BakeBit'"]}
-# 	to retry, use: --limit @/Users/pragtich/Documents/NanoPi/ansible-setup/configure.retry
-
-# PLAY RECAP *****************************************************************************************************************
-# 10.0.0.204                 : ok=15   changed=5    unreachable=0    failed=1
-
-        
-# - name: Enable saving to network servers
-#   hosts: backup
-#   vars:
-#     BACKUP_USER:   pragtich
-#   tasks:
-#   - name: Transfer ssh public ID to backup
-#     authorized_key:
-#       user: "{{ BACKUP_USER }}"
-#       key: "{{ lookup('file', neo2_key.pub }}"
 
