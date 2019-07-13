@@ -120,12 +120,21 @@
       git:
         repo: 'https://github.com/pragtich/NanoHatOLED.git'
         force: yes
-        dest: '~/NanoHatOLED'
+        dest: '/home/pragtich/NanoHatOLED'
     - name: Install OLED prerequesites
       become: yes
       apt:
         name:
           - python-setuptools
+          - python-pip
+          - git
+          - libi2c-dev
+          - python-serial
+          - i2c-tools
+          - python-smbus
+          - minicom
+          - python-dev
+          - libfreetype6-dev
           - libjpeg-dev
         state: present
     - name: Install python requesites for OLED
@@ -135,6 +144,7 @@
         state: latest
         name:
           - Pillow
+          - image
         
     - name: Install my OLED driver
       become: yes
