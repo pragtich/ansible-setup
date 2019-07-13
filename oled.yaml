@@ -32,9 +32,8 @@
           - python-dev
           - libfreetype6-dev
           - libjpeg-dev
-          - psutil
         state: present
-    - name: Install python requesites for OLED
+    - name: Install python requirements for OLED
       become: yes
       pip:
         executable: /usr/local/bin/pip2.7
@@ -43,6 +42,14 @@
           - pip
           - image
           - Pillow
+          - file:///home/pragtich/NanoHatOLED/BakeBit/Script/RPi.GPIO-0.5.11
+    - name: Install FriendlyArm's python requirements for OLED
+      become: yes
+      pip:
+        executable: /usr/local/bin/pip2.7
+        state: installed
+        name:
+          - file:///home/pragtich/NanoHatOLED/BakeBit/Script/RPi.GPIO-0.5.11
         
     - name: Install my OLED driver
       become: yes
