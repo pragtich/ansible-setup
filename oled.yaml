@@ -32,6 +32,7 @@
           - python-dev
           - libfreetype6-dev
           - libjpeg-dev
+          - psutil
         state: present
     - name: Install python requesites for OLED
       become: yes
@@ -39,8 +40,9 @@
         executable: /usr/local/bin/pip2.7
         state: latest
         name:
-          - Pillow
+          - pip
           - image
+          - Pillow
         
     - name: Install my OLED driver
       become: yes
