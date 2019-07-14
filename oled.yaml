@@ -4,6 +4,9 @@
 # Install Nanohat OLED drivers for menu through NanoPi Neo2 metal case's buttons
 #
 
+## TODO: clean up and make idempotent
+## TODO: test on a clean install
+
 - name: Install OLED 
   remote_user: pragtich
   hosts: [neo2]
@@ -12,7 +15,7 @@
       # TODO: Clean up the NanoHatOLED structure and make it easier to customize
       # TODO: make this more idempotent (make my own install ?)
       # TODO: remove superuser privileges, only needed because install.sh pulls in Bakebit as root
-      become: yes
+      #become: yes
       git:
         repo: 'https://github.com/pragtich/NanoHatOLED.git'
         force: yes
@@ -74,11 +77,12 @@
 
 
     - name: Compile NanoHatOLED script
-      become: yes
       shell: gcc Source/daemonize.c Source/main.c -lrt -lpthread -o NanoHatOLED
       args:
         chdir: /home/pragtich/NanoHatOLED
         creates: NanoHatOLED
+
+
         
     # - name: Install my OLED driver
     #   become: yes
