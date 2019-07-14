@@ -61,18 +61,25 @@
       become: yes
       pip:
         executable: /usr/local/bin/pip2.7
-        state: forcereinstall
+        state: present
         name:
-#          - file:///home/pragtich/NanoHatOLED/BakeBit/Script/RPi.GPIO-0.5.11
+          - file:///home/pragtich/NanoHatOLED/BakeBit/Script/RPi.GPIO-0.5.11
           - file:///home/pragtich/NanoHatOLED/BakeBit/Script/psutil-0.5.0
 
     - name: Install FriendlyArm's C requirements (WiringNP) for OLED
-      become: yes
+      #become: yes
       shell: /home/pragtich/NanoHatOLED/BakeBit/Script/WiringNP/build
       args:
-        chdir: /home/pragtich/NanoHatOLED/BakeBit/Script/WiringNP
+        chdir: /home/pragtich/NanoHatOLED/BakeBit/Script/WiringNP/
 
 
+    - name: Compile NanoHatOLED script
+      become: yes
+      shell: gcc Source/daemonize.c Source/main.c -lrt -lpthread -o NanoHatOLED
+      args:
+        chdir: /home/pragtich/NanoHatOLED
+        creates: NanoHatOLED
+        
     # - name: Install my OLED driver
     #   become: yes
     #   shell: /home/pragtich/NanoHatOLED/install.sh
