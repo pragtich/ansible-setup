@@ -82,7 +82,13 @@
         chdir: /home/pragtich/NanoHatOLED
         creates: NanoHatOLED
 
-
+# Copy oled-start to right place
+# Give oled-start permissions
+# add oled-start to rc.local
+# test
+# move from rc.local to systemd
+# template oled-start to dynamic folder?
+# test from clean setup
         
     # - name: Install my OLED driver
     #   become: yes
