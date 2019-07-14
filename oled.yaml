@@ -43,17 +43,39 @@
           - image
           - Pillow
 
+    - name: Delete previously present FriendlyArm python requirements for OLED
+      # Not nice to do, but necessary because otherwise we get distutils uninstall errors...
+      become: yes
+      file:
+        state: absent
+        path: "{{ item }}"
+      with_items:
+        - /usr/local/lib/python2.7/dist-packages/RPi/
+        - /usr/local/lib/python2.7/dist-packages/RPi.GPIO-0.5.11.egg-info
+        - /usr/local/lib/python2.7/dist-packages/psutil/
+        - /usr/local/lib/python2.7/dist-packages/_psutil_linux.so
+        - /usr/local/lib/python2.7/dist-packages/_psutil_posix.so
+        - /usr/local/lib/python2.7/dist-packages/psutil-0.5.0.egg-info/
+        - /usr/local/lib/python2.7/dist-packages/psutil-0.5.0-py2.7-linux-aarch64.egg          
     - name: Install FriendlyArm's python requirements for OLED
       become: yes
       pip:
         executable: /usr/local/bin/pip2.7
         state: forcereinstall
         name:
-          - file:///home/pragtich/NanoHatOLED/BakeBit/Script/RPi.GPIO-0.5.11
+#          - file:///home/pragtich/NanoHatOLED/BakeBit/Script/RPi.GPIO-0.5.11
+          - file:///home/pragtich/NanoHatOLED/BakeBit/Script/psutil-0.5.0
 
-    - name: Install my OLED driver
+    - name: Install FriendlyArm's C requirements (WiringNP) for OLED
       become: yes
-      shell: /home/pragtich/NanoHatOLED/install.sh
+      shell: /home/pragtich/NanoHatOLED/BakeBit/Script/WiringNP/build
       args:
-        chdir: /home/pragtich/NanoHatOLED/
+        chdir: /home/pragtich/NanoHatOLED/BakeBit/Script/WiringNP
+
+
+    # - name: Install my OLED driver
+    #   become: yes
+    #   shell: /home/pragtich/NanoHatOLED/install.sh
+    #   args:
+    #     chdir: /home/pragtich/NanoHatOLED/
 
