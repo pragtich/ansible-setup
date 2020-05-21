@@ -78,23 +78,29 @@
           - wheel
           - homeassistant
 
+- name: Finalize with sudo rights
+  remote_user: pragtich
+  hosts: [neo2]
+
+
+  tasks:
     - name: Create systemd service for homeassistant
+      become: yes
       #TODO: cant I make user modules?
       copy:
         src:   home-assistant@homeassistant.service
         dest:  /lib/systemd/system/
     - name: Install homeassistant configuration
+      # TODO: can do without elevated permissions, right?
+      become: yes
       copy:
         src:  "{{ item }}"
         dest: /home/homeassistant/.homeassistant/
         force: yes
+        group: homeassistant
+        owner: homeassistant
       with_fileglob:
         - ha-config/*.yaml
-
-- name: Drop back to reduced privileges
-  remote_user: pragtich
-  hosts: [neo2]
-  tasks:
     - name: Enable homeassistant service
       become: yes
       systemd:
