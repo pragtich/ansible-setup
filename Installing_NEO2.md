@@ -108,17 +108,19 @@ Not really necessary: I am using my own personal keys.
 
 - [x] Disable password login for all
 - [x] Update packages
-- [ ] Get profile tips from existing templates
+- [x] Get profile tips from existing templates
 - [x] Drop my profiles into place
 - [x] Install HomeAssistant
 - [ ] Don't put security sensitive stuff into github
-- [ ] Move homeassistant `configuration.yaml` into ansible
+- [x] Move homeassistant `configuration.yaml` into ansible
 - [ ] Debug mysensors presentations
-- [ ] Configure HA?
 - [ ] Backups
 - [x] Move this file to Github
 - [ ] Investigate using Roles
-
+- [ ] Investigate how the removal/dissuation of YAML impacts this project
+- [ ] Configure zones
+- [ ] Check weither I need to document more of the steps
+- [ ] Configure interesting add-ins
 
 # Installing Python #
 
