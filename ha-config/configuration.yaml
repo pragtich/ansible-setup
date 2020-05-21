@@ -59,8 +59,11 @@ sun:
 #  - platform: google
 
 # Cloud
-cloud:
+#cloud:
 
+mobile_app:
+  
+  
 system_health:
   
 sensor:
