@@ -169,6 +169,26 @@ We are installing some requirements right away, since we are going to need them 
         state: present
 ```
 
+# Install Homeassistant in a virtualenv #
+
+```
+    - name: Create systemd service for homeassistant
+      #TODO: cant I make user modules?
+	  become: yes
+      copy:
+        src:   home-assistant@homeassistant.service
+        dest:  /lib/systemd/system/
+```
+
+
+I would like to install the Homeassistant service as a user service. According to [a remark on the great ArchWiki](https://wiki.archlinux.org/index.php/Systemd/User#Automatic_start-up_of_systemd_user_instances), it is possible to get a user service to run upon boot. Let's try to get this installed by Ansible. For now, I am using a system service with `systemd`'s `User=` feature. 
+
+Somehow, the `.homeassistant` folder gets created with `root.root` ownership on the first try, which causes the first startup to fail. When I delete it, or change ownership it is back to working. Not sure why yet, shoud try to reinstall from nothing to test if it still persists.
+
+
+
+# Start Homeassistant automatically #
+
 # Backups #
 
 ```shell
@@ -234,7 +254,6 @@ $ ansible-vault edit pr8-vault.yaml
 $ ansible-playbook -i hosts -k setup.yaml --ask-vault-pass
 # login with old SSH password. Will fail halfway through due to the password changing. Run it again with the new SSH pwd.
 ```
-
 
 
 # Notes
