@@ -14,6 +14,8 @@
 
 # TODO: https://docs.ansible.com/ansible/become.html#becoming-an-unprivileged-user
 
+# Usage: 
+
 
 - name: "Do first configuration. You must run through setup manually first"
   hosts: neo2
