@@ -1,19 +1,18 @@
 
 # Installing a NanoPi Neo2 
 
-All based upon the original firmware (FriendlyCore Xenial 4.14 with OLED).
-Will I regret that?
+Based on Armbian Bionic.
 
 
 - [x] Give it an IP address on the router 
 
-`10.0.0.204`
+`10.0.0.3`
 
 - [x] Add IP address to hosts/inventory file (`ansible-setup/hosts`)
 
 ```
 [neo2]
-10.0.0.204
+10.0.0.3
 ```
 
 ```shell
@@ -25,9 +24,48 @@ SSH password:
 }
 ```
 
--k to ask for root password (`fa` by default)
+Update May 2020: it now fails:
 
-- [x] Change root pwd
+```shell
+10.0.0.3 | FAILED! => {
+    "msg": "to use the 'ssh' connection type with passwords, you must install the sshpass program"
+}
+```
+
+So let's install `sshpass` and test again:
+
+```shell
+$ brew install sshpass
+Error: No available formula with the name "sshpass"
+We won't add sshpass because it makes it too easy for novice SSH users to
+ruin SSH's security.
+```
+That seems to be not the way to go.
+
+```shell
+curl -O -L https://fossies.org/linux/privat/sshpass-1.06.tar.gz && tar xvzf sshpass-1.06.tar.gz
+
+cd sshpass-1.06
+
+./configure
+
+sudo make install
+```
+
+That runs without problems, and then:
+
+```shell
+10:44 $ ansible -i hosts  neo2 -m ping --ask-pass
+SSH password:
+10.0.0.3 | SUCCESS => {
+    "changed": false,
+    "ping": "pong"
+}
+```
+
+
+
+# Change root pwd #
 
 [The ansible FAQ explains a bit](https://docs.ansible.com/ansible/latest/reference_appendices/faq.html#how-do-i-generate-crypted-passwords-for-the-user-module).
 
@@ -76,58 +114,16 @@ Not really necessary: I am using my own personal keys.
 - [ ] Don't put security sensitive stuff into github
 - [ ] Move homeassistant `configuration.yaml` into ansible
 - [ ] Debug mysensors presentations
+- [ ] Configure HA?
+- [ ] Backups
+- [x] Move this file to Github
+- [ ] Investigate using Roles
 
 
-## Understanding Mysensors presentation issue
+# Installing Python #
 
-Homeassistant log below. 
+We need a new-ish version of Python in order to support Homeassistant.
 
-It is trying to send a presentation request, but it never gets sent out.
-
-```
-Dec 26 14:05:53 neo2 hass[560]: 2018-12-26 14:05:53 DEBUG (MainThread) [mysensors] Receiving 0;255;3;0;2;2.3.1-beta
-Dec 26 14:05:57 neo2 hass[560]: 2018-12-26 14:05:57 DEBUG (MainThread) [mysensors] Receiving 12;255;3;0;33;300000
-Dec 26 14:05:58 neo2 hass[560]: 2018-12-26 14:05:58 DEBUG (MainThread) [mysensors] Receiving 12;1;1;0;16;0
-Dec 26 14:05:58 neo2 hass[560]: 2018-12-26 14:05:58 WARNING (MainThread) [mysensors] Node 12 is unknown
-Dec 26 14:05:58 neo2 hass[560]: 2018-12-26 14:05:58 INFO (MainThread) [mysensors] Requesting new presentation for node 12
-Dec 26 14:05:58 neo2 hass[560]: 2018-12-26 14:05:58 DEBUG (MainThread) [mysensors] Sending 12;255;3;0;19;
-Dec 26 14:06:02 neo2 hass[560]: 2018-12-26 14:06:02 DEBUG (MainThread) [mysensors] Sending 0;255;3;0;2;
-Dec 26 14:06:03 neo2 hass[560]: 2018-12-26 14:06:03 DEBUG (MainThread) [mysensors] Receiving 0;255;3;0;2;2.3.1-beta
-Dec 26 14:06:13 neo2 hass[560]: 2018-12-26 14:06:13 DEBUG (MainThread) [mysensors] Sending 0;255;3;0;2;
-Dec 26 14:06:13 neo2 hass[560]: 2018-12-26 14:06:13 DEBUG (MainThread) [mysensors] Receiving 0;255;3;0;2;2.3.1-beta
-Dec 26 14:06:23 neo2 hass[560]: 2018-12-26 14:06:23 DEBUG (MainThread) [mysensors] Sending 0;255;3;0;2;
-```
-
-The gateway log:
-No presentation request seen. Is this Smartsleep messing things up or what is going on?
-
-```
-0;255;3;0;2;2.3.1-beta
-0;255;3;0;2;2.3.1-beta
-0;255;3;0;2;2.3.1-beta
-0;255;3;0;2;2.3.1-beta
-0;255;3;0;2;2.3.1-beta
-0;255;3;0;2;2.3.1-beta
-12;255;3;0;33;300000
-12;1;1;0;16;0
-0;255;3;0;2;2.3.1-beta
-0;255;3;0;2;2.3.1-beta
-0;255;3;0;2;2.3.1-beta
-0;255;3;0;2;2.3.1-beta
-0;255;3;0;2;2.3.1-beta
-```
-
-
-
-
-After some depreciation warnings, this seems to be the recommended way at present:
-```
-    - name: Install python 3 and HA requirements
-      apt:
-        name:
-           - python3
-        state: present
-```
 
 Following [the RPi instructions on the HA site](https://www.home-assistant.io/docs/installation/raspberry-pi/), but with the following changes:
 
@@ -139,17 +135,25 @@ $ python3 --version
 Python 3.5.2
 ```
 
-In order to force a newer Python version to be installed, we need to go outside of Ubuntu's defaults. 
+In order to force a newer Python version to be installed, we need to go outside of Debian's defaults. In general it is a good thing that Debian is quite conservative with its packages. One of the most annoying things in Linux in general, in my opinion, is stuff breaking all the time. But in this case, we do need a somewhat less ancient version.
 
-Let's add the `deadsnakes` PPA:
+Let's add the `deadsnakes` PPA, that's where a lot of more recent Pythons are distributed:
 
 ```
     - name: Add deadsnakes to get newer Python
       apt_repository:
         repo: ppa:deadsnakes/ppa
+    - name: apt upgrade
+      become: yes
+      apt:
+        update_cache:     yes
+        cache_valid_time: 3600
+        upgrade:          safe
 ```
 
 And install a fixed version of Python. I have not managed to find a way to pin the version other than this one. This does mean, that we will not be automatically upgraded beyond version `3.7`.
+
+We are installing some requirements right away, since we are going to need them for installing Homeassistant:
 
 ```
     - name: Install python 3 and HA requirements
@@ -157,21 +161,15 @@ And install a fixed version of Python. I have not managed to find a way to pin t
         name:
            - python3.7
            - python3.7-venv
+		   - python3.7-dev
            - python3-pip
+           - python3-setuptools
+		   - libffi-dev
+		   - libssl-dev
         state: present
 ```
 
-TODO:
-I manually upgraded PIP:
-
-```shell
-python3.7 -m pip install --upgrade pip
-```
-
-How to do this using ansible??
-
-- [ ] Configure HA?
-- [ ] Backups
+# Backups #
 
 ```shell
 
@@ -183,8 +181,6 @@ Crontab?
 
 
 
-- [x] Move this file to Github
-- [ ] Investigate using Roles
 
 # Structure
 
@@ -227,7 +223,8 @@ In order to decrypt the vault, the command lines need to change somewhat. For ex
 
 ```shell
 $ ansible-playbook -i hosts  enable-root.yaml
-$ ansible-playbook -i hosts -k setup.yaml --ask-vault-pass
+$ ansible-playbook -i hosts -k setup.yaml --ask-vault-pass  # Need to enter both root password and vault password
+$ ansible-playbook -i hosts configure.yaml --ask-vault-pass
 ```
 
 Of course, now it is time to change my passwords :-)
