@@ -1,19 +1,54 @@
 
 # Installing a NanoPi Neo2 
 
-Based on Armbian Bionic.
+I chose to try and use Ansible in order to create a reproducible setup for my cute & low powered [NanoPi NEO2](https://www.friendlyarm.com/index.php?route=product/product&product_id=180). It's a great little board, really not very expensive and incredibly small. The aluminium housing especially took my fancy, giving a nice OLED display and a few buttons. That's why I got the [NEO2 Metal Complete Kit](https://www.friendlyarm.com/index.php?route=product/product&product_id=189).
+
+I chose to make the system based on Armbian Bionic, since my previous experience of manufacturer's own distributions has been, that they find it difficult to stay up to date for any period of time. Better to use a well-known and stable Linux such as Armbian or DietPi. I chose Armbian because of its advertised support for the NEO2, and was not disappointed. Perhaps some specific hardware support might be easier when working with the manufacturer's own distributions, but for now I am very happy.
+
+
+# Task list #
 
 
 - [x] Give it an IP address on the router 
-
-`10.0.0.3`
-
 - [x] Add IP address to hosts/inventory file (`ansible-setup/hosts`)
+- [x] Set hostname
+- [x] Disable the unwanted user names
+- [x] Create my user (wheel), test sudo
+- [x] Copy ssh keys
+- [x] Also make sure the keys are backed up. 
+- [x] Disable password login for all
+- [x] Update packages
+- [x] Get profile tips from existing templates
+- [x] Drop my profiles into place
+- [x] Install HomeAssistant
+- [x] Don't put security sensitive stuff into github
+- [x] Move homeassistant `configuration.yaml` into ansible
+- [ ] Backups
+- [x] Move this file to Github
+- [ ] Investigate using Roles to modularize stuff (eg config transfer)
+- [ ] Investigate how the removal/dissuation of YAML impacts this project
+- [ ] Configure zones
+- [ ] Check weither I need to document more of the steps
+- [ ] Move Homeassistant config to Git repository
+- [ ] Move to [more up to date config methods](https://www.home-assistant.io/blog/2020/04/14/the-future-of-yaml/)
+- [ ] Configure interesting add-ins
+
+
+
+# IP Address and initial configuration #
+
+When the computer first boots up from a freshly flashed Armbian SD card, it will take a while to setup the system, but will finally try to come online on the Ethernet port by means of DHCP. It can also be reached via a serial device which is offered through the USB power connection. This does not seem to be a console connection (this is available elsewhere on the board), but rather a 'traditional' serial terminal connection. It runs at 9600 baud.
+
+Upon first login, (`root` with password `1234`), the user is asked to enter a new `root` password, and to create a proper user account. This is essential for the following to work, since we use this account for logging in with Ansible.
+
+The IP address can be found by a port scan, by checking the router's DHCP client list, or by logging in through the USB serial port. This address and a hostname need to be added to a catalog file:
 
 ```
 [neo2]
 10.0.0.3
 ```
+
+Then, Ansible can be tested.
 
 ```shell
 $ ansible -i hosts all -u root -k -m ping
@@ -24,7 +59,7 @@ SSH password:
 }
 ```
 
-Update May 2020: it now fails:
+Update May 2020: ping now fails on the first try:
 
 ```shell
 10.0.0.3 | FAILED! => {
@@ -44,11 +79,8 @@ That seems to be not the way to go.
 
 ```shell
 curl -O -L https://fossies.org/linux/privat/sshpass-1.06.tar.gz && tar xvzf sshpass-1.06.tar.gz
-
 cd sshpass-1.06
-
 ./configure
-
 sudo make install
 ```
 
@@ -63,9 +95,16 @@ SSH password:
 }
 ```
 
+Hello world!
+
+# Setup the system with the basics #
+
+Some of the first things that need to be done after the first login, prepare the sytem. For example, I enable passwordless login for the user account and disable passworded root login. These preparations need only be done once, and require a root password, so I split them out into a separate playbook: `setup.yaml`. [Here on Github](https://github.com/pragtich/ansible-setup/blob/master/setup.yaml).
 
 
-# Change root pwd #
+
+
+## Change root pwd ##
 
 [The ansible FAQ explains a bit](https://docs.ansible.com/ansible/latest/reference_appendices/faq.html#how-do-i-generate-crypted-passwords-for-the-user-module).
 
@@ -98,29 +137,35 @@ SSH password:
 }
 ```
 
-- [x] Set hostname
-- [x] Disable the unwanted user names
-- [x] Create my user (wheel), test sudo
-- [x] Copy ssh keys
-- [x] Also make sure the keys are backed up. 
+## Add a user ##
 
-Not really necessary: I am using my own personal keys.
+Just in case I forgot to login for the first time, or I do not want to, create a user for general use, and allow key login.
 
-- [x] Disable password login for all
-- [x] Update packages
-- [x] Get profile tips from existing templates
-- [x] Drop my profiles into place
-- [x] Install HomeAssistant
-- [ ] Don't put security sensitive stuff into github
-- [x] Move homeassistant `configuration.yaml` into ansible
-- [ ] Debug mysensors presentations
-- [ ] Backups
-- [x] Move this file to Github
-- [ ] Investigate using Roles
-- [ ] Investigate how the removal/dissuation of YAML impacts this project
-- [ ] Configure zones
-- [ ] Check weither I need to document more of the steps
-- [ ] Configure interesting add-ins
+```
+  - name: Add a user for myself
+    user:
+      name:        "{{ PR8_USER }}"
+      password:    "{{ PR8_USER_PWD }}"
+      shell:       "{{ PR8_SHELL }}"
+      generate_ssh_key: yes
+      groups:
+        - sudo
+        - dialout
+      append:      yes
+  - name: Make a local copy of the private key
+    become_user: "{{ PR8_USER }}"
+    become: yes
+    fetch:
+      src: ~/.ssh/id_rsa.pub
+      dest: "{{ ansible_hostname }}_key.pub"
+  - name: Allow key login for my user
+    authorized_key:
+      user: "{{ PR8_USER }}"
+      key: "{{ lookup('file', item) }}"
+    with_items: "{{ PR8_KEYS }}"
+```
+
+
 
 # Installing Python #
 
@@ -130,14 +175,8 @@ We need a new-ish version of Python in order to support Homeassistant.
 Following [the RPi instructions on the HA site](https://www.home-assistant.io/docs/installation/raspberry-pi/), but with the following changes:
 
 - Not making a separate folder, just using `/home/homeassistant`.
-- `RuntimeError: aiohttp 3.x requires Python 3.5.3+`
 
-```shell
-$ python3 --version
-Python 3.5.2
-```
-
-In order to force a newer Python version to be installed, we need to go outside of Debian's defaults. In general it is a good thing that Debian is quite conservative with its packages. One of the most annoying things in Linux in general, in my opinion, is stuff breaking all the time. But in this case, we do need a somewhat less ancient version.
+In order to force a newer Python version to be installed, we need to go outside of Debian's defaults. In general it is a good thing that Debian is quite conservative with its packages. One of the most annoying things in Linux in general, in my opinion, is stuff breaking all the time. But in this case, we do need a somewhat less conservative version. Anyway, Python is so heavily used, that any problem shoud be fixed very quickly.
 
 Let's add the `deadsnakes` PPA, that's where a lot of more recent Pythons are distributed:
 
@@ -185,11 +224,18 @@ We are installing some requirements right away, since we are going to need them 
 
 I would like to install the Homeassistant service as a user service. According to [a remark on the great ArchWiki](https://wiki.archlinux.org/index.php/Systemd/User#Automatic_start-up_of_systemd_user_instances), it is possible to get a user service to run upon boot. Let's try to get this installed by Ansible. For now, I am using a system service with `systemd`'s `User=` feature. 
 
-Somehow, the `.homeassistant` folder gets created with `root.root` ownership on the first try, which causes the first startup to fail. When I delete it, or change ownership it is back to working. Not sure why yet, shoud try to reinstall from nothing to test if it still persists.
-
-
 
 # Start Homeassistant automatically #
+
+The easiest way is to copy the systemd service file that's supplied by Homeassistant using the `copy` module. This does require `root` access. Some day I might figure out how to install a user service, but for now this works fine.
+
+# Transfer the Homeassistant configuration #
+
+I find it convenient to also use the `copy` module to transfer all the YAML configuration files. We'll have to see how the Homeassistant development changes in the future ([it seems that YAML is getting less popular](https://www.home-assistant.io/blog/2020/04/14/the-future-of-yaml/)), but for now this will work.
+
+The most important gotcha that I found is, that we need to be sure that the files are transferred with the correct `owner` and `group`, otherwise we'll have issues writing to the files in the future. 
+
+My idea is to make sure that all permanent changes to the configuration are created from Ansible. That should help to reinstall everything easily in case that something were to fail. Another way would be to make sure that the configuration lives in a Git repository somewhere, that might be a nice project for the future.
 
 # Backups #
 
