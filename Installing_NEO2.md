@@ -26,7 +26,9 @@ I chose to make the system based on Armbian Bionic, since my previous experience
 - [ ] Backups
 - [x] Move this file to Github
 - [ ] Investigate using Roles to modularize stuff (eg config transfer)
-- [ ] Investigate how the removal/dissuation of YAML impacts this project
+- [x] Investigate how the removal/dissuation of YAML impacts this project.
+Answer: not much, but I need to copy the entire `.homeassistant` folder and subfolders, not just the `*.yaml` files.
+- [ ] Transfer an entire skeleton folder, not just the config files
 - [ ] Configure zones
 - [ ] Check weither I need to document more of the steps
 - [ ] Move Homeassistant config to Git repository
@@ -241,7 +243,7 @@ My idea is to make sure that all permanent changes to the configuration are crea
 
 ```shell
 
-$ rsync -av -e ssh  / pragtich@trapkast:Backup-Neo2
+$ rsync -av -e ssh  /home pragtich@trapkast:Backup-Neo2
 
 ```
 
