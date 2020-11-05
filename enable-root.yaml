@@ -7,9 +7,9 @@
   remote_user: pragtich
   handlers:
     - name: Restart sshd
-      service:
+      systemd:
         name:  ssh
-        state: restarted
+        state: reloaded
   become: yes
   tasks:
     - name: Re-enable password login

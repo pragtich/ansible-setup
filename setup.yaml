@@ -30,9 +30,9 @@
       - ~/.ssh/id_rsa.pub
   handlers:
     - name: Restart sshd
-      service:
+      systemd:
         name:  ssh
-        state: restarted
+        state: reloaded
   tasks:
   - name: Set a better pwd for root
     user:
