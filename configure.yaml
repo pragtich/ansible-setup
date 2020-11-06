@@ -11,10 +11,6 @@
   vars_files:
     - pr8-vault.yaml
   tasks:
-    - name: Add deadsnakes to get newer Python
-      become: yes
-      apt_repository:
-        repo: ppa:deadsnakes/ppa
     - name: apt upgrade
       become: yes
       apt:
