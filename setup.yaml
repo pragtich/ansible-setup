@@ -32,7 +32,8 @@
     - name: Restart sshd
       systemd:
         name:  ssh
-        state: reloaded
+        daemon_reload: yes
+        state: restarted
   tasks:
   - name: Set a better pwd for root
     user:
