@@ -11,13 +11,23 @@
   vars_files:
     - pr8-vault.yaml
   tasks:
+    - name: Add docker key
+      become: yes
+      apt_key:
+        url: https://download.docker.com/linux/debian/gpg
+    - name: Add docker repo
+      become: yes
+      apt_repository:
+        repo: deb  https://download.docker.com/linux/debian buster stable
     - name: apt upgrade
       become: yes
       apt:
-        update_cache:     yes
+        update_cache:     no
         cache_valid_time: 3600
         upgrade:          safe
-  
+
+
+        
 - name: Finalize with sudo rights
   remote_user: pragtich
   hosts: [neo2]
