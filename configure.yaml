@@ -18,92 +18,11 @@
         cache_valid_time: 3600
         upgrade:          safe
   
-    - name: Install python 3 and HA requirements
-      become: yes
-      apt:
-        name:
-           - python3.7
-           - python3.7-venv
-           - python3.7-dev
-           - python3-pip
-           - python3-setuptools
-           - libffi-dev
-           - libssl-dev
-        state: present
-
-    - name: Install homeassistant user
-      become: yes
-      user:
-        name: homeassistant
-        system: yes
-        create_home: yes
-        password: "{{ HA_PWD }}" 
-        shell: "/bin/bash"
-        generate_ssh_key: yes
-        groups:
-          - dialout
-        append: yes
-    - name: Make a local copy of the private key
-      become_user: root
-      become: yes
-      fetch:
-        src: ~homeassistant/.ssh/id_rsa.pub
-        dest: "{{ ansible_hostname }}_homeassistant_key.pub"
-    - name: Allow key login for my user
-      become_user: root
-      become: yes
-      authorized_key:
-        user: "homeassistant"
-        key: "{{ lookup('file', item) }}"
-      with_items:
-         - ~/.ssh/id_rsa.pub
-    
-- name: "Homeassistant connect to create virtualenv"
-  remote_user: homeassistant
-  hosts: [neo2]
-  tasks:
-    - name: Create virtual environment
-      pip:
-        virtualenv: "/home/homeassistant/ha"
-        virtualenv_command: pyvenv-3.7
-#        virtualenv_python: python3.7
-        state: latest
-        name:
-          - pip
-          - setuptools
-          - wheel
-          - homeassistant
-
 - name: Finalize with sudo rights
   remote_user: pragtich
   hosts: [neo2]
 
-
   tasks:
-    - name: Create systemd service for homeassistant
-      become: yes
-      #TODO: cant I make user modules?
-      copy:
-        src:   home-assistant@homeassistant.service
-        dest:  /lib/systemd/system/
-    - name: Install homeassistant configuration
-      # TODO: can do without elevated permissions, right?
-      become: yes
-      copy:
-        src:  "{{ item }}"
-        dest: /home/homeassistant/.homeassistant/
-        force: yes
-        group: homeassistant
-        owner: homeassistant
-      with_fileglob:
-        - ha-config/*.yaml
-    - name: Enable homeassistant service
-      become: yes
-      systemd:
-        name: home-assistant@homeassistant.service
-        state: restarted
-        enabled: yes
-        daemon_reload: yes
     - name: Get my profile dotfiles
       git:
         repo: 'https://github.com/pragtich/dotfiles.git'
