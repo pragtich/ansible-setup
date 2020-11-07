@@ -33,7 +33,7 @@
           - docker-ce-cli
           - containerd.io
         state: present
-        - name: Install Home Assistant Supervised required packages
+    - name: Install Home Assistant Supervised required packages
       become: yes
       apt:
         name:
@@ -42,7 +42,7 @@
           - apparmor-utils
           - python3-apparmor
           - python3-libapparmor
-          - python3-pexpect     # Required by ansible expect module
+          - python3-pexpect      # Required by expect module in ansible
     - name: Put home assistant installer (Manually update now and then!)
       copy:
         src: installer.sh
