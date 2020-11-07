@@ -47,6 +47,14 @@
         src: installer.sh
         dest: installer.sh
 
+    - name: Run the Home Assistant Supervised installer
+      # TODO: CREATES toepassen
+      become: yes
+      expect:
+        chdir: ~pragtich/   #TODO variable path or user name
+        command: /bin/bash -c "~pragtich/installer.sh"
+        responses:
+          "[info] Do you want to proceed with that? [N/y]": "y"
         
 - name: Finalize with sudo rights
   remote_user: pragtich
