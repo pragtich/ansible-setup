@@ -25,7 +25,27 @@
         update_cache:     no
         cache_valid_time: 3600
         upgrade:          safe
-
+    - name: install Docker itself
+      become: yes
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+        state: present
+    - name: Install Home Assistant Supervised packages
+      become: yes
+      apt:
+        name:
+          - avahi-daemon
+          - apparmor
+          - apparmor-utils
+          - python3-apparmor
+          - python3-libapparmor
+    - name: Put home assistant installer (Manually update now and then!)
+      copy:
+        src: installer.sh
+        dest: installer.sh
 
         
 - name: Finalize with sudo rights
