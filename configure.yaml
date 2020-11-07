@@ -42,7 +42,7 @@
           - apparmor-utils
           - python3-apparmor
           - python3-libapparmor
-          - python3-pexpect
+          - python3-pexpect     # Required by ansible expect module
     - name: Put home assistant installer (Manually update now and then!)
       copy:
         src: installer.sh
