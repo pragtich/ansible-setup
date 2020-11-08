@@ -35,6 +35,20 @@
         daemon_reload: yes
         state: restarted
   tasks:
+  - name: Upgrade systemd to fix compatibility w/new kernel
+    become: yes
+    apt:
+      state: latest
+      default_release: buster-backports
+      update_cache: yes
+      name:
+        - systemd
+        - libpam-systemd
+        - libsystemd0
+        - libzstd1
+  - name: Restart systemd in the new version
+    systemd:
+      daemon-reexec: yes
   - name: Set a better pwd for root
     user:
       name:        root
