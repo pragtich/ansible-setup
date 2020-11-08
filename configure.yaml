@@ -19,12 +19,12 @@
       become: yes
       apt_repository:
         repo: deb  https://download.docker.com/linux/debian buster stable
-    - name: apt upgrade
-      become: yes
-      apt:
-        update_cache:     no
-        cache_valid_time: 3600
-        upgrade:          safe
+    # - name: apt upgrade
+    #   become: yes
+    #   apt:
+    #     update_cache:     no
+    #     cache_valid_time: 3600
+    #     upgrade:          safe
     - name: install Docker itself
       become: yes
       apt:
@@ -47,15 +47,16 @@
       copy:
         src: installer.sh
         dest: installer.sh
-
+        mode: a+x
     - name: Run the Home Assistant Supervised installer
       # TODO: CREATES toepassen
       become: yes
       expect:
+        timeout: 60
         chdir: ~pragtich/   #TODO variable path or user name
-        command: /bin/bash -c "~pragtich/installer.sh"
+        command: /bin/bash -c "~pragtich/installer.sh -m raspberrypi4-64"
         responses:
-          "[info] Do you want to proceed with that? [N/y]": "y"
+          Do you want to proceed with that?: "y\n"
         
 - name: Finalize with sudo rights
   remote_user: pragtich
