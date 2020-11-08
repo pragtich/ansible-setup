@@ -4,6 +4,10 @@
 # Configuration of the system
 # This is done using the newly created settings from the setup.yaml
 # Split, because setup.yaml needs root login and we disable that as the last step
+
+### TODO: follow these instructions to the letter and test:
+### https://docs.docker.com/engine/install/debian/#install-using-the-repository
+
 #
 - name: "Configure the system"
   hosts: neo2
