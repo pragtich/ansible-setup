@@ -22,9 +22,15 @@
     # - name: apt upgrade
     #   become: yes
     #   apt:
-    #     update_cache:     no
+    #     update_cache:     yes
     #     cache_valid_time: 3600
     #     upgrade:          safe
+    - name: Disable new firewall system and go back to iptables (ansible-galaxy collection install community.general)
+      become: yes
+      community.general.alternatives:
+        name: iptables
+        path: /usr/sbin/iptables-legacy
+        
     - name: install Docker itself
       become: yes
       apt:
@@ -32,7 +38,7 @@
           - docker-ce
           - docker-ce-cli
           - containerd.io
-        state: present
+        state: latest
     - name: Install Home Assistant Supervised required packages
       become: yes
       apt:
@@ -52,7 +58,7 @@
       # TODO: CREATES toepassen
       become: yes
       expect:
-        timeout: 60
+        timeout: 120
         chdir: ~pragtich/   #TODO variable path or user name
         command: /bin/bash -c "~pragtich/installer.sh -m raspberrypi4-64"
         responses:
