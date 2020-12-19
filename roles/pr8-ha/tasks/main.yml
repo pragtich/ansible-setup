@@ -5,12 +5,6 @@
 #
 #
 
-- name: Make sure the apt-get database is up to date
-  become: yes
-  apt:
-    update_cache: yes
-    cache_valid_time: 3600    # 1 hour
-    
 - name: Make sure that we have the Docker GPG key
   become: yes
   apt_key:
@@ -27,6 +21,12 @@
     name: iptables
     path: /usr/sbin/iptables-legacy
 
+- name: Make sure the apt-get database is up to date
+  become: yes
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600    # 1 hour
+    
 - name: install Docker and helpers
   become: yes
   apt:
@@ -47,3 +47,26 @@
       - python3-libapparmor
       - python3-pexpect      # Required by expect module in ansible
 
+- name: Put home assistant installer (Manually update now and then!)
+  copy:
+    src: installer.sh
+    dest: installer.sh
+    mode: a+x
+- name: Run the Home Assistant Supervised installer
+  # TODO: CREATES toepassen
+  become: yes
+  expect:
+    timeout: 120
+    chdir: ~pragtich/   #TODO variable path or user name
+    command: /bin/bash -c "~pragtich/installer.sh -m raspberrypi4-64"
+    responses:
+      Do you want to proceed with that?: "y\n"
+
+- name: User must be in docker group
+  become: yes
+  user:
+    name: pragtich #TODO: variabel maken
+    groups:
+      - docker
+      - dialout
+    append: yes
