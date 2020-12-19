@@ -1,0 +1,5 @@
+- name: Install Homeassistant following role pr8-ha
+  hosts: neo2
+  roles:
+    - role: pr8-ha
+  
