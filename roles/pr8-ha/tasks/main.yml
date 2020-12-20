@@ -70,3 +70,11 @@
       - docker
       - dialout
     append: yes
+
+- name: Install samba addon
+  command: /usr/bin/ha addons install core_samba
+    #TODO: Reference https://www.golinuxcloud.com/create-ansible-role-with-example-playbooks/
+    # TODO: restore a snapshot
+    # TODO: get the latest snapshot
+    # TODO: take regular snapshots
+    # TODO: move templates to role folder
