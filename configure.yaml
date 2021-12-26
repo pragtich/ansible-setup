@@ -61,7 +61,17 @@
           - docker-ce-cli
           - containerd.io
         state: latest
-
+    - name: install Homeassistant OS Agent (Make sure to update regularly!)
+      become: yes
+      apt:
+        deb: 'https://github.com/home-assistant/os-agent/releases/download/1.2.2/os-agent_1.2.2_linux_aarch64.deb'
+    - name: install Homeassistant Supervisor
+      become: yes
+      apt:
+        deb: 'https://github.com/home-assistant/supervised-installer/releases/latest/download/homeassistant-supervised.deb'
+        #"https://github.com/home-assistant/supervised-installer/releases/latest/download/homeassistant-supervised.deb"
+    
+        
     # Disabled install script, they use a .deb file now
     - name: Put home assistant installer (Manually update now and then!)
       when: 1 < 0 # NOT ACTIVE
@@ -70,6 +80,7 @@
         dest: installer.sh
         mode: a+x
     - name: Run the Home Assistant Supervised installer
+      when: 1 < 0 # NOT ACTIVE
       # TODO: CREATES toepassen
       become: yes
       expect:
@@ -78,7 +89,8 @@
         command: /bin/bash -c "~pragtich/installer.sh -m odroid-n2"
         responses:
           Do you want to proceed with that?: "y\n"
-        
+
+          
 - name: Finalize with sudo rights
   remote_user: pragtich
   hosts: [neo2, blue]

@@ -489,7 +489,7 @@ Change system type to `odroid-n2`
 Update my local copy of the installer!
 Add the prereqs
 
-
+TODO: automatically fetch the correct .deb file for the OS Agent
 
 
 
