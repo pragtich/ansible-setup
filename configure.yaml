@@ -23,12 +23,12 @@
       become: yes
       apt_repository:
         repo: deb  https://download.docker.com/linux/debian bullseye stable
-    # - name: apt upgrade
-    #   become: yes
-    #   apt:
-    #     update_cache:     yes
-    #     cache_valid_time: 3600
-    #     upgrade:          safe
+    - name: apt upgrade
+      become: yes
+      apt:
+        update_cache:     yes
+        cache_valid_time: 3600
+        upgrade:          safe
     - name: Disable new firewall system and go back to iptables (ansible-galaxy collection install community.general)
       become: yes
       community.general.alternatives:
@@ -69,7 +69,8 @@
       become: yes
       apt:
         deb: 'https://github.com/home-assistant/supervised-installer/releases/latest/download/homeassistant-supervised.deb'
-        #"https://github.com/home-assistant/supervised-installer/releases/latest/download/homeassistant-supervised.deb"
+      environment:
+        MACHINE: "odroid-n2"   #"https://github.com/home-assistant/supervised-installer/releases/latest/download/homeassistant-supervised.deb"
     
         
     # Disabled install script, they use a .deb file now

@@ -491,12 +491,61 @@ Add the prereqs
 
 TODO: automatically fetch the correct .deb file for the OS Agent
 
+standard_init_linux.go:228: exec user process caused: exec format error" launching the docker container "homeassistant
+
+10:~ pragtich$ sudo docker ps -a
+CONTAINER ID   IMAGE                                                           COMMAND                  CREATED         STATUS                          PORTS                                   NAMES
+041aae4f15c8   ghcr.io/home-assistant/generic-x86-64-homeassistant:2021.12.5   "/init"                  6 minutes ago   Exited (1) About a minute ago                                           homeassistant
+387af7780851   ghcr.io/home-assistant/aarch64-hassio-multicast:2021.04.0       "/init"                  7 minutes ago   Up 7 minutes                                                            hassio_multicast
+3efd2ad4e8aa   ghcr.io/home-assistant/aarch64-hassio-observer:2021.10.0        "/init"                  7 minutes ago   Up 7 minutes                    0.0.0.0:4357->80/tcp, :::4357->80/tcp   hassio_observer
+3e02f4524d19   ghcr.io/home-assistant/aarch64-hassio-audio:2021.07.0           "/init"                  7 minutes ago   Up 7 minutes                                                            hassio_audio
+fb6d54bdc92f   ghcr.io/home-assistant/aarch64-hassio-dns:2021.06.0             "/init"                  7 minutes ago   Up 7 minutes                                                            hassio_dns
+c485ff784b7f   ghcr.io/home-assistant/aarch64-hassio-cli:2021.09.0             "/init /bin/bash -c …"   7 minutes ago   Up 7 minutes                                                            hassio_cli
+460f6a634bff   homeassistant/aarch64-hassio-supervisor                         "/init"                  8 minutes ago   Up 8 minutes                                                            hassio_supervisor
+
+--> It installed the x86 container. Probably need to pass machine-type somehow?
 
 
 
+https://www.leaseweb.com/labs/2013/06/creating-custom-debian-packages/
+https://stackoverflow.com/questions/31956900/set-env-variable-in-ansible-apt-module
+
+      environment:
+        MACHINE: "odroid-n2"  
+
+```shell
+    "aarch64")
+        if [ -z $MACHINE ]; then
+             db_input critical ha/machine-type | true
+             db_go || true
+             db_get ha/machine-type || true
+             MACHINE="$RET"
+             db_stop
+
+        fi
+```
 
 
+Cleanup after failed install involves removing all containers:
 
+sudo docker rm -f $(sudo docker ps -a -q)
 
+https://www.digitalocean.com/community/tutorials/how-to-remove-docker-images-containers-and-volumes
+sudo docker system prune -a
+
+sudo -i -H
+echo PURGE | debconf-communicate homeassistant-supervised
+
+check /etc/hassio.json
+rm -rf /etc/docker
+
+TODO: re-add apt upgrade!
+TODO: check prereqs and remove outdated (avahi etc)
+TODO: add user to docker group
+
+TODO: Not sure that setting environment variable works, installing through shell did.
+Sould test this when I get a chance.
+
+TODO: Alternative: use command or shell plugins...
 
 
