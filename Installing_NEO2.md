@@ -97,6 +97,8 @@ SSH password:
 }
 ```
 
+But actually, all you need to do, is `ssh` into the unit and accept the host key. Once it is in the `known_hosts` list, it's fine.
+
 Hello world!
 
 # Setup the system with the basics #
@@ -461,3 +463,40 @@ PATH="$HOME/bin:$HOME/.local/bin:$PATH"
 
 Login to a user account from a sudo user:
 sudo -u homeassistant -H -s
+
+# Upgrade to Bullseye
+
+Dec 2021 attempt to install home assistant, learned that HA now only supports Bullseye (Debian 11). Updated the ansible files to match (not too many changes).
+
+```shell
+fatal: [10.0.0.100]: FAILED! => {"changed": true, "cmd": "/bin/bash -c \"~pragtich/installer.sh -m raspberrypi4-64\"", "delta": "0:00:10.508873", "end": "2021-12-26 14:54:53.181277", "msg": "non-zero return code", "rc": 1, "start": "2021-12-26 14:54:42.672404", "stdout": "\u001b[33m[warn] \u001b[39m\r\n\u001b[33m[warn] If you want more control over your own system, run\u001b[39m\r\n\u001b[33m[warn] Home Assistant as a VM or run Home Assistant Core\u001b[39m\r\n\u001b[33m[warn] via a Docker container.\u001b[39m\r\n\u001b[33m[warn] \u001b[39m\r\n\u001b[33m[warn] If you want to abort, hit ctrl+c within 10 seconds...\u001b[39m\r\n\u001b[33m[warn] \u001b[39m\r\n\u001b[32m[info] Creating default docker daemon configuration /etc/docker/daemon.json\u001b[39m\r\n\u001b[32m[info] Restarting docker service\u001b[39m\r\n
+Job for docker.service failed because the control process exited with error code.\r\n
+See \"systemctl status docker.service\" and \"journalctl -xe\" for details.", "stdout_lines": ["\u001b[33m[warn] \u001b[39m", "\u001b[33m[warn] If you want more control over your own system, run\u001b[39m", "\u001b[33m[warn] Home Assistant as a VM or run Home Assistant Core\u001b[39m", "\u001b[33m[warn] via a Docker container.\u001b[39m", "\u001b[33m[warn] \u001b[39m", "\u001b[33m[warn] If you want to abort, hit ctrl+c within 10 seconds...\u001b[39m", "\u001b[33m[warn] \u001b[39m", "\u001b[32m[info] Creating default docker daemon configuration /etc/docker/daemon.json\u001b[39m", "\u001b[32m[info] Restarting docker service\u001b[39m", "Job for docker.service failed because the control process exited with error code.", "See \"systemctl status docker.service\" and \"journalctl -xe\" for details."]}
+```
+
+Or from the journal (`journald -xe`):
+
+```shell
+dockerd[20128]: unable to configure the Docker daemon with file /etc/docker/daemon.json: json: cannot unmarshal number into Go value of type map[string]interface {}
+```
+
+change `buster` to `bullseye` in docker apt repository definition.
+
+Do I need to add the recommended GPG stuff? Or the required prereqs?
+
+Change system type to `odroid-n2`
+
+Update my local copy of the installer!
+Add the prereqs
+
+
+
+
+
+
+
+
+
+
+
+

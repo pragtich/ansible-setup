@@ -10,7 +10,7 @@
 
 #
 - name: "Configure the system"
-  hosts: neo2
+  hosts: [neo2, blue]
   remote_user: pragtich
   vars_files:
     - pr8-vault.yaml
@@ -22,7 +22,7 @@
     - name: Add docker repo
       become: yes
       apt_repository:
-        repo: deb  https://download.docker.com/linux/debian buster stable
+        repo: deb  https://download.docker.com/linux/debian bullseye stable
     # - name: apt upgrade
     #   become: yes
     #   apt:
@@ -35,14 +35,6 @@
         name: iptables
         path: /usr/sbin/iptables-legacy
         
-    - name: install Docker itself
-      become: yes
-      apt:
-        name:
-          - docker-ce
-          - docker-ce-cli
-          - containerd.io
-        state: latest
     - name: Install Home Assistant Supervised required packages
       become: yes
       apt:
@@ -53,7 +45,26 @@
           - python3-apparmor
           - python3-libapparmor
           - python3-pexpect      # Required by expect module in ansible
+          # From https://github.com/home-assistant/supervised-installer:
+          - jq
+          - wget
+          - curl
+          - udisks2
+          - libglib2.0-bin
+          - network-manager
+          - dbus
+    - name: install Docker itself
+      become: yes
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+        state: latest
+
+    # Disabled install script, they use a .deb file now
     - name: Put home assistant installer (Manually update now and then!)
+      when: 1 < 0 # NOT ACTIVE
       copy:
         src: installer.sh
         dest: installer.sh
@@ -64,13 +75,13 @@
       expect:
         timeout: 120
         chdir: ~pragtich/   #TODO variable path or user name
-        command: /bin/bash -c "~pragtich/installer.sh -m raspberrypi4-64"
+        command: /bin/bash -c "~pragtich/installer.sh -m odroid-n2"
         responses:
           Do you want to proceed with that?: "y\n"
         
 - name: Finalize with sudo rights
   remote_user: pragtich
-  hosts: [neo2]
+  hosts: [neo2, blue]
 
   tasks:
     - name: Get my profile dotfiles

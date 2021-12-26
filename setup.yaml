@@ -110,6 +110,6 @@
     notify:   Restart sshd
   - name: Set hostname
     hostname:
-      name: {{ inventory_hostname }}
+      name: "{{ inventory_hostname }}"
 
       
