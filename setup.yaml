@@ -18,7 +18,7 @@
 
 
 - name: "Do first configuration. You must run through setup manually first"
-  hosts: neo2
+  hosts: [neo2, blue]
   remote_user: root
 
   vars_files:
@@ -36,6 +36,7 @@
         state: restarted
   tasks:
   - name: Upgrade systemd to fix compatibility w/new kernel
+    when: 0 > 1
     become: yes
     apt:
       state: latest
@@ -109,6 +110,6 @@
     notify:   Restart sshd
   - name: Set hostname
     hostname:
-      name: neo2
+      name: {{ inventory_hostname }}
 
       

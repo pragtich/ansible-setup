@@ -1,6 +1,9 @@
 [neo2]
 10.0.0.123
 
+[blue]
+10.0.0.100
+
 [backup]
 trapkast
 

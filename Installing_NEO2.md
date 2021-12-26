@@ -23,7 +23,7 @@ I chose to make the system based on Armbian Bionic, since my previous experience
 - [x] Install HomeAssistant
 - [x] Don't put security sensitive stuff into github
 - [x] Move homeassistant `configuration.yaml` into ansible
-- [ ] Backups
+- [x] Backups
 - [x] Move this file to Github
 - [ ] Investigate using Roles to modularize stuff (eg config transfer)
 - [x] Investigate how the removal/dissuation of YAML impacts this project.
