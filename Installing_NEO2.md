@@ -549,3 +549,5 @@ Sould test this when I get a chance.
 TODO: Alternative: use command or shell plugins...
 
 
+sudo debconf-show homeassistant-supervised
+* ha/machine-type: odroid-n2
