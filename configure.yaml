@@ -14,6 +14,9 @@
   remote_user: pragtich
   vars_files:
     - pr8-vault.yaml
+  handlers:
+    - name: Reboot now
+      reboot:
   tasks:
     - name: apt upgrade
       become: yes
@@ -28,15 +31,20 @@
     - name: apt install
       become: yes
       apt:
+        cache_valid_time: 60 #seconds
         name:
           - ipxe-qemu
           - libvirt-daemon
+          - libvirt-daemon-system
           - qemu-efi-aarch64
           - qemu-efi-arm
           - qemu-system-arm
           - qemu-utils
           - virtinst
           - cloud-utils
+          - dnsmasq
+          - dmidecode
+      notify: Reboot now
             
 - name: Create a virtual machine for Homeassistant
   hosts: [blue]
@@ -51,9 +59,15 @@
     vm_size: "32G"
     vm_memory: "2048"
     vm_config: "{{vm_libvirt}}/{{vm_name}}/cloud-init.cfg"
-    vm_config_iso: "{{vm_libvirt}}/{{vm_name}}/cloud-init.iso"    
+    vm_config_iso: "{{vm_libvirt}}/{{vm_name}}/cloud-init.iso"
+    vm_cpus: 1
+    vm_maxcpus: 4
 
   tasks:
+    - name: Stop the VM if it's already running
+      shell:
+        cmd: "virsh shutdown {{vm_name}}; virsh undefine {{vm_name}}"
+      ignore_errors: yes
     - name: Create folders
       file:
         state: directory
@@ -63,7 +77,7 @@
         - "/var/lib/libvirt/templates"
         - "/var/lib/libvirt/images"
         - "/var/lib/libvirt/{{vm_name}}"
-    
+      
     - name: Fetch the OS image
       get_url:
         dest: "{{vm_image}}"
@@ -75,15 +89,15 @@
       shell:
         cmd: "qemu-img resize {{vm_rootdisk}} {{vm_size}}"
     - name: Create the configuration file
-      fetch:
-        src: cloud-init.cfg
+      copy:
+        src: "cloud-init.cfg"
         dest: "{{vm_config}}"
     - name: Convert the configuration file
       shell:
         cmd: "cloud-localds {{vm_config_iso}} {{vm_config}}"
     - name: Install/import the OS into a VM
       shell:
-        cmd: "virt-install --name {{vm_name}} --memory {{vm_memory}} --disk {{vm_rootdisk}},device=disk,bus=virtio --disk {{vm_config_iso}},device=cdrom --os-type linux --os-variant debian10 --virt-type kvm --graphics none --network network=default,model=virtio --import"
+        cmd: "virt-install --name {{vm_name}} --memory {{vm_memory}} --vcpus {{vm_cpus}},{{vm_maxcpus}} --cpu host --disk {{vm_rootdisk}},device=disk,bus=virtio --disk {{vm_config_iso}},device=cdrom --os-type linux --os-variant debian10 --virt-type kvm --graphics none --network network=default,model=virtio --import --noautoconsole"
   
 - name: Finalize with sudo rights
   remote_user: pragtich
