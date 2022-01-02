@@ -18,7 +18,7 @@
 
 
 - name: "Do first configuration. You must run through setup manually first"
-  hosts: [neo2, blue]
+  hosts: [blue]
   remote_user: root
 
   vars_files:
@@ -37,6 +37,7 @@
   tasks:
   - name: Upgrade systemd to fix compatibility w/new kernel
     when: 0 > 1
+    # DISABLED, no longer relevant
     become: yes
     apt:
       state: latest
@@ -48,8 +49,11 @@
         - libsystemd0
         - libzstd1
   - name: Restart systemd in the new version
+    when: 0 > 1
+    # DISABLED, no longer relevant
     systemd:
       daemon-reexec: yes
+      
   - name: Set a better pwd for root
     user:
       name:        root
