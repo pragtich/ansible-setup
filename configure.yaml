@@ -7,7 +7,7 @@
 
 ### TODO: follow these instructions to the letter and test:
 ### https://docs.docker.com/engine/install/debian/#install-using-the-repository
-
+# Installs qemu and supporting software and puts home assistant into a virtual server
 #
 - name: "Configure the system"
   hosts: [neo2, blue]
@@ -15,81 +15,12 @@
   vars_files:
     - pr8-vault.yaml
   tasks:
-    - name: Add docker key
-      become: yes
-      apt_key:
-        url: https://download.docker.com/linux/debian/gpg
-    - name: Add docker repo
-      become: yes
-      apt_repository:
-        repo: deb  https://download.docker.com/linux/debian bullseye stable
     - name: apt upgrade
       become: yes
       apt:
         update_cache:     yes
         cache_valid_time: 3600
         upgrade:          safe
-    - name: Disable new firewall system and go back to iptables (ansible-galaxy collection install community.general)
-      become: yes
-      community.general.alternatives:
-        name: iptables
-        path: /usr/sbin/iptables-legacy
-        
-    - name: Install Home Assistant Supervised required packages
-      become: yes
-      apt:
-        name:
-          - avahi-daemon
-          - apparmor
-          - apparmor-utils
-          - python3-apparmor
-          - python3-libapparmor
-          - python3-pexpect      # Required by expect module in ansible
-          # From https://github.com/home-assistant/supervised-installer:
-          - jq
-          - wget
-          - curl
-          - udisks2
-          - libglib2.0-bin
-          - network-manager
-          - dbus
-    - name: install Docker itself
-      become: yes
-      apt:
-        name:
-          - docker-ce
-          - docker-ce-cli
-          - containerd.io
-        state: latest
-    - name: install Homeassistant OS Agent (Make sure to update regularly!)
-      become: yes
-      apt:
-        deb: 'https://github.com/home-assistant/os-agent/releases/download/1.2.2/os-agent_1.2.2_linux_aarch64.deb'
-    - name: install Homeassistant Supervisor
-      become: yes
-      apt:
-        deb: 'https://github.com/home-assistant/supervised-installer/releases/latest/download/homeassistant-supervised.deb'
-      environment:
-        MACHINE: "odroid-n2"   #"https://github.com/home-assistant/supervised-installer/releases/latest/download/homeassistant-supervised.deb"
-    
-        
-    # Disabled install script, they use a .deb file now
-    - name: Put home assistant installer (Manually update now and then!)
-      when: 1 < 0 # NOT ACTIVE
-      copy:
-        src: installer.sh
-        dest: installer.sh
-        mode: a+x
-    - name: Run the Home Assistant Supervised installer
-      when: 1 < 0 # NOT ACTIVE
-      # TODO: CREATES toepassen
-      become: yes
-      expect:
-        timeout: 120
-        chdir: ~pragtich/   #TODO variable path or user name
-        command: /bin/bash -c "~pragtich/installer.sh -m odroid-n2"
-        responses:
-          Do you want to proceed with that?: "y\n"
 
           
 - name: Finalize with sudo rights
