@@ -17,7 +17,7 @@
 # Usage: 
 
 
-- name: "Do first configuration. You must run through setup manually first"
+- name: "Do first configuration. You must run through setup manually first and ssh into the machine once to get the host signature."
   hosts: [blue]
   remote_user: root
 

@@ -23,7 +23,7 @@
         upgrade:          safe
 
 - name: Install QEMU and related software
-  hosts: blue
+  hosts: [blue]
   tasks:
     - name: apt install
       become: yes
@@ -36,9 +36,55 @@
           - qemu-system-arm
           - qemu-utils
           - virtinst
+          - cloud-utils
             
 - name: Create a virtual machine for Homeassistant
-          
+  hosts: [blue]
+  become: yes
+  vars:
+    vm_libvirt: "/var/lib/libvirt"
+    vm_name: d11c
+    vm_dir: "{{vm_libvirt}}/images/{{vm_name}}"
+    vm_image_url: "https://cloud.debian.org/images/cloud/bullseye/latest/debian-11-generic-arm64.qcow2"
+    vm_image: "{{vm_libvirt}}/templates/{{vm_name}}"
+    vm_rootdisk: "{{vm_libvirt}}/{{vm_name}}/root-disk.qcow2"
+    vm_size: "32G"
+    vm_memory: "2048"
+    vm_config: "{{vm_libvirt}}/{{vm_name}}/cloud-init.cfg"
+    vm_config_iso: "{{vm_libvirt}}/{{vm_name}}/cloud-init.iso"    
+
+  tasks:
+    - name: Create folders
+      file:
+        state: directory
+        path: "{{item}}"
+      loop:
+        - "{{vm_dir}}"
+        - "/var/lib/libvirt/templates"
+        - "/var/lib/libvirt/images"
+        - "/var/lib/libvirt/{{vm_name}}"
+    
+    - name: Fetch the OS image
+      get_url:
+        dest: "{{vm_image}}"
+        url: "{{vm_image_url}}"
+    - name: Convert the OS image
+      shell:
+        cmd: "qemu-img convert -f qcow2 -O qcow2 {{vm_image}} {{vm_rootdisk}}"
+    - name: Resize the OS image
+      shell:
+        cmd: "qemu-img resize {{vm_rootdisk}} {{vm_size}}"
+    - name: Create the configuration file
+      fetch:
+        src: cloud-init.cfg
+        dest: "{{vm_config}}"
+    - name: Convert the configuration file
+      shell:
+        cmd: "cloud-localds {{vm_config_iso}} {{vm_config}}"
+    - name: Install/import the OS into a VM
+      shell:
+        cmd: "virt-install --name {{vm_name}} --memory {{vm_memory}} --disk {{vm_rootdisk}},device=disk,bus=virtio --disk {{vm_config_iso}},device=cdrom --os-type linux --os-variant debian10 --virt-type kvm --graphics none --network network=default,model=virtio --import"
+  
 - name: Finalize with sudo rights
   remote_user: pragtich
   hosts: [neo2, blue]
