@@ -22,6 +22,22 @@
         cache_valid_time: 3600
         upgrade:          safe
 
+- name: Install QEMU and related software
+  hosts: blue
+  tasks:
+    - name: apt install
+      become: yes
+      apt:
+        name:
+          - ipxe-qemu
+          - libvirt-daemon
+          - qemu-efi-aarch64
+          - qemu-efi-arm
+          - qemu-system-arm
+          - qemu-utils
+          - virtinst
+            
+- name: Create a virtual machine for Homeassistant
           
 - name: Finalize with sudo rights
   remote_user: pragtich
