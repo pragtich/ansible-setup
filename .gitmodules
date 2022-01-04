@@ -1,0 +1,3 @@
+[submodule "kvm-scripts"]
+	path = kvm-scripts
+	url = https://github.com/doccaz/kvm-scripts.git
