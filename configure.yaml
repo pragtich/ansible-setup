@@ -66,7 +66,7 @@
   tasks:
     - name: Stop the VM if it's already running
       shell:
-        cmd: "virsh shutdown {{vm_name}}; virsh undefine {{vm_name}}"
+        cmd: "virsh shutdown {{vm_name}}; virsh undefine {{vm_name}} --nvram"
       ignore_errors: yes
     - name: Create folders
       file:
@@ -97,7 +97,7 @@
         cmd: "cloud-localds {{vm_config_iso}} {{vm_config}}"
     - name: Install/import the OS into a VM
       shell:
-        cmd: "virt-install --name {{vm_name}} --memory {{vm_memory}} --vcpus {{vm_cpus}},{{vm_maxcpus}} --cpu host --disk {{vm_rootdisk}},device=disk,bus=virtio --disk {{vm_config_iso}},device=cdrom --os-type linux --os-variant debian10 --virt-type kvm --graphics none --network network=default,model=virtio --import --noautoconsole"
+        cmd: "virt-install --name {{vm_name}} --memory {{vm_memory}} --vcpus={{vm_cpus}},maxvcpus={{vm_maxcpus}} --disk {{vm_rootdisk}},device=disk,bus=virtio --check path_in_use=off --disk {{vm_config_iso}},device=cdrom --os-type linux --os-variant debian10 --virt-type kvm --graphics none --network network=default,model=virtio --import --noautoconsole"
   
 - name: Finalize with sudo rights
   remote_user: pragtich
