@@ -15,7 +15,7 @@
   vars_files:
     - pr8-vault.yaml
   handlers:
-    - name: Reboot now
+    - name: "Reboot now"
       reboot:
   tasks:
     - name: apt upgrade
@@ -44,7 +44,8 @@
           - cloud-utils
           - dnsmasq
           - dmidecode
-      notify: Reboot now
+          - libnss-libvirt
+      notify: "Reboot now"
             
 - name: Create a virtual machine for Homeassistant
   hosts: [blue]
@@ -77,7 +78,11 @@
         - "/var/lib/libvirt/templates"
         - "/var/lib/libvirt/images"
         - "/var/lib/libvirt/{{vm_name}}"
-      
+    - name: "Enable NSS entry for libvirt: discover host names"
+      lineinfile:
+        path: /etc/nsswitch.conf
+        regexp: "^hosts:"
+        line: "hosts:          files libvirt_guest mymachines dns myhostname"
     - name: Fetch the OS image
       get_url:
         dest: "{{vm_image}}"
@@ -95,6 +100,21 @@
     - name: Convert the configuration file
       shell:
         cmd: "cloud-localds {{vm_config_iso}} {{vm_config}}"
+    - name: Copy helper scripts from doccaz
+      copy:
+        src: kvm-scripts/qemu-hook-script
+        dest: "/etc/libvirt/hooks/qemu"
+        mode: "+x"
+    - name: Add my own port forwards to the helper script
+      lineinfile:
+        line: "addForward {{vm_name}} eth0 10.0.0.100 2222 virbr0 {{vm_name}} 22 tcp"
+        path: "/etc/libvirt/hooks/qemu"
+    - name: Reload libvirt service
+      service:
+        name: libvirtd.service
+        state: restarted
+#NEXT: IP addresses in hook needs to be dynamic or something -- can I use the hostname?
+#aanroep van addforward moet anders gedaan woren
     - name: Install/import the OS into a VM
       shell:
         cmd: "virt-install --name {{vm_name}} --memory {{vm_memory}} --vcpus={{vm_cpus}},maxvcpus={{vm_maxcpus}} --disk {{vm_rootdisk}},device=disk,bus=virtio --check path_in_use=off --disk {{vm_config_iso}},device=cdrom --os-type linux --os-variant debian10 --virt-type kvm --graphics none --network network=default,model=virtio --import --noautoconsole"

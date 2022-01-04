@@ -6,3 +6,7 @@ In the process of migrating this to a QEMU-based system, since homeassistant is 
 # Includes code from
 
 [doccaz' kvm scripts](https://github.com/doccaz/kvm-scripts.git)
+
+# Includes tips from
+
+[libvirt NSS page](https://libvirt.org/nss.html)
