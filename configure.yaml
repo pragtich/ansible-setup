@@ -18,34 +18,35 @@
     - name: "Reboot now"
       reboot:
   tasks:
-    - name: apt upgrade
-      become: yes
-      apt:
-        update_cache:     yes
-        cache_valid_time: 3600
-        upgrade:          safe
+    # - name: apt upgrade
+    #   become: yes
+    #   apt:
+    #     update_cache:     yes
+    #     cache_valid_time: 3600
+    #     upgrade:          safe
 
-- name: Install QEMU and related software
-  hosts: [blue]
-  tasks:
-    - name: apt install
-      become: yes
-      apt:
-        cache_valid_time: 60 #seconds
-        name:
-          - ipxe-qemu
-          - libvirt-daemon
-          - libvirt-daemon-system
-          - qemu-efi-aarch64
-          - qemu-efi-arm
-          - qemu-system-arm
-          - qemu-utils
-          - virtinst
-          - cloud-utils
-          - dnsmasq
-          - dmidecode
-          - libnss-libvirt
-      notify: "Reboot now"
+# - name: Install QEMU and related software
+#   hosts: [blue]
+#   tasks:
+#     - name: apt install
+#       become: yes
+#       apt:
+#         cache_valid_time: 60 #seconds
+#         name:
+#           - ipxe-qemu
+#           - libvirt-daemon
+#           - libvirt-daemon-system
+#           - qemu-efi-aarch64
+#           - qemu-efi-arm
+#           - qemu-system-arm
+#           - qemu-utils
+#           - virtinst
+#           - cloud-utils
+#           - dnsmasq
+#           - dmidecode
+#           - libnss-libvirt
+#           - python3-lxml
+#       notify: "Reboot now"
             
 - name: Create a virtual machine for Homeassistant
   hosts: [blue]
@@ -63,6 +64,7 @@
     vm_config_iso: "{{vm_libvirt}}/{{vm_name}}/cloud-init.iso"
     vm_cpus: 1
     vm_maxcpus: 4
+    vm_xml: "/etc/libvirt/qemu/{{vm_name}}.xml"
 
   tasks:
     - name: Stop the VM if it's already running
@@ -100,15 +102,16 @@
     - name: Convert the configuration file
       shell:
         cmd: "cloud-localds {{vm_config_iso}} {{vm_config}}"
-    - name: Copy helper scripts from doccaz
-      copy:
-        src: kvm-scripts/qemu-hook-script
-        dest: "/etc/libvirt/hooks/qemu"
-        mode: "+x"
-    - name: Add my own port forwards to the helper script
-      lineinfile:
-        line: "addForward {{vm_name}} eth0 10.0.0.100 2222 virbr0 {{vm_name}} 22 tcp"
-        path: "/etc/libvirt/hooks/qemu"
+    # - name: Copy helper scripts from doccaz
+    #   copy:
+    #     src: kvm-scripts/qemu-hook-script
+    #     dest: "/etc/libvirt/hooks/qemu"
+    #     mode: "+x"
+    # - name: Add my own port forwards to the helper script
+    #   lineinfile:
+    #     line: "addForward {{vm_name}} eth0 10.0.0.100 2222 virbr0 {{vm_name}} 22 tcp"
+    #     path: "/etc/libvirt/hooks/qemu"
+
     - name: Reload libvirt service
       service:
         name: libvirtd.service
@@ -118,6 +121,16 @@
     - name: Install/import the OS into a VM
       shell:
         cmd: "virt-install --name {{vm_name}} --memory {{vm_memory}} --vcpus={{vm_cpus}},maxvcpus={{vm_maxcpus}} --disk {{vm_rootdisk}},device=disk,bus=virtio --check path_in_use=off --disk {{vm_config_iso}},device=cdrom --os-type linux --os-variant debian10 --virt-type kvm --graphics none --network network=default,model=virtio --import --noautoconsole"
+
+    - name: try to fix the VM's IP address (requires ansible-galaxy collection install community.general and lxml Python module)
+      community.general.xml:
+        path: "{{vm_xml}}"
+        xpath: "/domain/devices/interface[@type='network']/mac"
+        content: attribute
+      register: vm_mac
+    - name: debug
+      debug:
+        var: vm_mac.matches[0].mac.address
   
 - name: Finalize with sudo rights
   remote_user: pragtich
