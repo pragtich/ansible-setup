@@ -25,28 +25,30 @@
     #     cache_valid_time: 3600
     #     upgrade:          safe
 
-# - name: Install QEMU and related software
-#   hosts: [blue]
-#   tasks:
-#     - name: apt install
-#       become: yes
-#       apt:
-#         cache_valid_time: 60 #seconds
-#         name:
-#           - ipxe-qemu
-#           - libvirt-daemon
-#           - libvirt-daemon-system
-#           - qemu-efi-aarch64
-#           - qemu-efi-arm
-#           - qemu-system-arm
-#           - qemu-utils
-#           - virtinst
-#           - cloud-utils
-#           - dnsmasq
-#           - dmidecode
-#           - libnss-libvirt
-#           - python3-lxml
-#       notify: "Reboot now"
+- name: Install QEMU and related software
+  hosts: [blue]
+  tasks:
+    - name: apt install
+      become: yes
+      notify: "Reboot now"
+      apt:
+        cache_valid_time: 60 #seconds
+        name:
+          - ipxe-qemu
+          - libvirt-daemon
+          - libvirt-daemon-system
+          - qemu-efi-aarch64
+          - qemu-efi-arm
+          - qemu-system-arm
+          - qemu-utils
+          - virtinst
+          - cloud-utils
+          - dnsmasq
+          - dmidecode
+          - libnss-libvirt
+          - bridge-utils
+
+      
             
 - name: Create a virtual machine for Homeassistant
   hosts: [blue]
@@ -65,6 +67,8 @@
     vm_cpus: 1
     vm_maxcpus: 4
     vm_xml: "/etc/libvirt/qemu/{{vm_name}}.xml"
+    vm_ip: 10.0.0.98
+    vm_gateway: 10.0.0.1
 
   tasks:
     - name: Stop the VM if it's already running
@@ -102,6 +106,22 @@
     - name: Convert the configuration file
       shell:
         cmd: "cloud-localds {{vm_config_iso}} {{vm_config}}"
+
+
+    # host MAC address can be found using: ansible_default_ipv4.macaddress
+    - name: Disable netfilter on bridge -- copy bridge.conf
+      copy:
+        dest: "/etc/sysctl.d/bridge.conf"
+        src: bridge.conf
+    - name: Disable netfilter on bridge -- copy 99-bridge.rules
+      copy:
+        dest: "/etc/udev/rules.d/99-bridge.rules"
+        src: 99-bridge.rules
+    - name: Disable netfilter on bridge -- copy bridge.if
+      template:
+        dest: "/etc/network/interfaces.d/bridge.if"
+        src: bridge.if
+    
     # - name: Copy helper scripts from doccaz
     #   copy:
     #     src: kvm-scripts/qemu-hook-script

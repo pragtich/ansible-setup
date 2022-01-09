@@ -10,3 +10,4 @@ In the process of migrating this to a QEMU-based system, since homeassistant is 
 # Includes tips from
 
 [libvirt NSS page](https://libvirt.org/nss.html)
+[libvirt networking cookbook](https://jamielinux.com/docs/libvirt-networking-handbook/bridged-network.html)

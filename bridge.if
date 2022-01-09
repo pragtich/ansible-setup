@@ -1,0 +1,24 @@
+# If unsure what 'netmask' or 'gateway' should be, ask your hosting provider.
+
+iface eth0 inet manual
+
+auto br0
+iface br0 inet static
+    # Use the MAC address identified above.
+    hwaddress ether {{ ansible_default_ipv4.macaddress }}
+    address {{ vm_ip }}
+       netmask 255.255.255.0
+    gateway {{ vm_gateway }}
+
+    bridge_ports eth0
+    # If you want to turn on Spanning Tree Protocol, ask your hosting
+    # provider first as it may conflict with their network.
+    bridge_stp off
+    # If STP is off, set to 0. If STP is on, set to 2 (or greater).
+    bridge_fd 0
+
+# iface br0 inet6 static
+#    address 2001:db8::1
+#    netmask 64
+#    gateway fe80::1
+#    autoconf 0
