@@ -122,16 +122,6 @@
         dest: "/etc/network/interfaces.d/bridge.if"
         src: bridge.if
     
-    # - name: Copy helper scripts from doccaz
-    #   copy:
-    #     src: kvm-scripts/qemu-hook-script
-    #     dest: "/etc/libvirt/hooks/qemu"
-    #     mode: "+x"
-    # - name: Add my own port forwards to the helper script
-    #   lineinfile:
-    #     line: "addForward {{vm_name}} eth0 10.0.0.100 2222 virbr0 {{vm_name}} 22 tcp"
-    #     path: "/etc/libvirt/hooks/qemu"
-
     - name: Reload libvirt service
       service:
         name: libvirtd.service
