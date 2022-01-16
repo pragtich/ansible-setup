@@ -53,6 +53,8 @@
 - name: Create a virtual machine for Homeassistant
   hosts: [blue]
   become: yes
+  vars_files:
+    - pr8-vault.yaml
   vars:
     vm_libvirt: "/var/lib/libvirt"
     vm_name: d11c
@@ -99,8 +101,11 @@
     - name: Resize the OS image
       shell:
         cmd: "qemu-img resize {{vm_rootdisk}} {{vm_size}}"
+    - name: debug vault
+      debug:
+        var: CLOUD_PWD
     - name: Create the configuration file
-      copy:
+      template:
         src: "cloud-init.cfg"
         dest: "{{vm_config}}"
     - name: Convert the configuration file
@@ -112,15 +117,15 @@
     - name: Disable netfilter on bridge -- copy bridge.conf
       copy:
         dest: "/etc/sysctl.d/bridge.conf"
-        src: bridge.conf
+        src: "network/bridge.conf"
     - name: Disable netfilter on bridge -- copy 99-bridge.rules
       copy:
         dest: "/etc/udev/rules.d/99-bridge.rules"
-        src: 99-bridge.rules
+        src: "network/99-bridge.rules"
     - name: Disable netfilter on bridge -- copy bridge.if
       template:
         dest: "/etc/network/interfaces.d/bridge.if"
-        src: bridge.if
+        src: "network/bridge.if"
     
     - name: Reload libvirt service
       service:
