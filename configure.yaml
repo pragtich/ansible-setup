@@ -69,15 +69,16 @@
     vm_cpus: 1
     vm_maxcpus: 4
     vm_xml: "/etc/libvirt/qemu/{{vm_name}}.xml"
-    vm_ip: 10.0.0.97
+    # vm_ip: 10.0.0.97 Not used: we are currently using DHCP on the bridge network
     vm_host_ip: 10.0.0.98 # TODO: kan uit ansible gehaald worden
     vm_gateway: 10.0.0.1
 
   tasks:
     - name: Stop the VM if it's already running
       shell:
-        cmd: "virsh shutdown {{vm_name}}; virsh undefine {{vm_name}} --nvram"
+        cmd: "virsh shutdown {{vm_name}}"
       ignore_errors: yes
+      
     - name: Create folders
       file:
         state: directory
@@ -129,11 +130,16 @@
         src: "network/bridge.if"
     
     - name: Reload libvirt service
+      #TODO: only need to reload if libvirt config changed (when exactly?)
       service:
         name: libvirtd.service
         state: restarted
     - name: Restart networking on host
       shell: "ifdown --exclude=lo -a; sleep 1; ifup --exclude=lo -a"
+
+
+    - name: Nuke the existing vm
+      shell: "virsh undefine {{vm_name}} --nvram"
       
 #NEXT: IP addresses in hook needs to be dynamic or something -- can I use the hostname?
 #aanroep van addforward moet anders gedaan woren
