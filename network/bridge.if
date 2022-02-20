@@ -6,7 +6,7 @@ auto br0
 iface br0 inet static
     # Use the MAC address identified above.
     hwaddress ether {{ ansible_default_ipv4.macaddress }}
-    address {{ vm_ip }}
+    address {{ vm_host_ip }}
        netmask 255.255.255.0
     gateway {{ vm_gateway }}
 
