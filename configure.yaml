@@ -12,18 +12,13 @@
 - name: "Configure the system"
   hosts: [neo2, blue]
   remote_user: pragtich
-  vars_files:
-    - pr8-vault.yaml
-  handlers:
-    - name: "Reboot now"
-      reboot:
   tasks:
-    # - name: apt upgrade
-    #   become: yes
-    #   apt:
-    #     update_cache:     yes
-    #     cache_valid_time: 3600
-    #     upgrade:          safe
+    - name: apt upgrade
+      become: yes
+      apt:
+        update_cache:     yes
+        cache_valid_time: 3600
+        upgrade:          safe
 
 - name: Install QEMU and related software
   hosts: [blue]
@@ -102,7 +97,7 @@
         regexp: "^hosts:"
         line: "hosts:          files libvirt_guest mymachines dns myhostname"
 
-      - name: Create folders
+    - name: Create folders
       file:
         state: directory
         path: "{{item}}"
