@@ -9,6 +9,10 @@
 ### https://docs.docker.com/engine/install/debian/#install-using-the-repository
 # Installs qemu and supporting software and puts home assistant into a virtual server
 #
+#
+# Need to install an a new-ish kernel (5.11 reported to work, 5.8 is broken) because of:
+#https://discuss.linuxcontainers.org/t/vms-do-not-start-on-lxd-4-10-4-11-on-aarch64-with-kernel-5-10/10227/5
+#For this reason I tend to install an Ubuntu (Jammy?) on the host -- its kernels are newer in the precompiled armbians
 - name: "Configure the system"
   hosts: [neo2, blue]
   remote_user: pragtich
@@ -22,6 +26,9 @@
 
 - name: Install QEMU and related software
   hosts: [blue]
+  handlers:
+    - name: "Reboot now"
+      reboot: 
   tasks:
     - name: apt install
       become: yes
@@ -76,6 +83,7 @@
       listen: Nuke the VM
     - name: Nuke the existing vm
       shell: "virsh undefine {{vm_name}} --nvram"
+      ignore_errors: yes
       listen: Nuke the VM
     - name: Convert the OS image
       shell:
