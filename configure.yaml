@@ -68,7 +68,7 @@
     vm_memory: "2048"
     vm_config: "{{vm_libvirt}}/{{vm_name}}/cloud-init.cfg"
     vm_config_iso: "{{vm_libvirt}}/{{vm_name}}/cloud-init.iso"
-    vm_cpus: 1
+    vm_cpus: 2
     vm_maxcpus: 4
     vm_xml: "/etc/libvirt/qemu/{{vm_name}}.xml"
     # vm_ip: 10.0.0.97 Not used: we are currently using DHCP on the bridge network
@@ -76,9 +76,9 @@
     vm_gateway: 10.0.0.1
 
   handlers:
-    - name: Stop the VM if it's already running
+    - name: (Hard)Stop the VM if it's already running
       shell:
-        cmd: "virsh shutdown {{vm_name}}"
+        cmd: "virsh destroy {{vm_name}}"
       ignore_errors: yes
       listen: Nuke the VM
     - name: Nuke the existing vm
@@ -151,7 +151,9 @@
         name: libvirtd.service
         state: restarted
     - name: Restart networking on host
-      shell: "ifdown --exclude=lo -a; sleep 1; ifup --exclude=lo -a"
+      shell: "ifup br0"
+      ignore_errors: yes
+      #shell: "ifdown --exclude=lo -a; sleep 1; ifup --exclude=lo -a"
       
       # Handlers should run here
     - name: Trigger a VM nuke if required
