@@ -1,11 +1,16 @@
-[neo2]
-10.0.0.123
+---
+neo2:
+  hosts:
+    neo2:
+      ansible_host: 10.0.0.123
 
-[blue]
-10.0.0.98
+blue:
+  hosts:
+    blue:
+      ansible_host: 10.0.0.98
 
-[backup]
-trapkast
+backup:
+  hosts:
+    trapkast
 
-[neo2:vars]
-ansible_python_interpreter=/usr/bin/python3
+

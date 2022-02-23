@@ -3,7 +3,7 @@
 # Mainly used when setup.yaml has been updated
 
 - name: Re-enable root login over SSH
-  hosts: neo2
+  hosts: all
   remote_user: pragtich
   handlers:
     - name: Restart sshd
