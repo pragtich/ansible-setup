@@ -49,8 +49,9 @@
           - dmidecode
           - libnss-libvirt
           - bridge-utils
-
-      
+          - avahi-daemon
+          - avahi-utils
+          - libnss-mdns      
             
 - name: Create a virtual machine for Homeassistant
   hosts: [blue]
@@ -99,11 +100,11 @@
       listen: Nuke the VM
       
   tasks:
-    - name: "Enable NSS entry for libvirt: discover host names"
+    - name: "Enable NSS and mdns entry for libvirt: discover host names"
       lineinfile:
         path: /etc/nsswitch.conf
         regexp: "^hosts:"
-        line: "hosts:          files libvirt_guest mymachines dns myhostname"
+        line: "hosts:          files libvirt_guest mdns4_minimal [NOTFOUND=return] mymachines dns mdns4 myhostname"
 
     - name: Create folders
       file:
