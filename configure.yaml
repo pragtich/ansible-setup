@@ -60,17 +60,14 @@
     - pr8-vault.yaml
   vars:
     vm_libvirt: "/var/lib/libvirt"
-    vm_name: d11c
-    vm_dir: "{{vm_libvirt}}/images/{{vm_name}}"
-    vm_image_url: "https://cloud.debian.org/images/cloud/bullseye/latest/debian-11-generic-arm64.qcow2"
-    vm_image: "{{vm_libvirt}}/templates/{{vm_name}}"
-    vm_rootdisk: "{{vm_libvirt}}/{{vm_name}}/root-disk.qcow2"
+    vm_name: homeassistant
+    vm_image_url: "https://os-builds.home-assistant.io/8.0.dev20220302/haos_generic-aarch64-8.0.dev20220302.qcow2.xz"
+    vm_rootdisk_folder: "{{vm_libvirt}}/{{vm_name}}"
+    vm_image: "{{vm_rootdisk_folder}}/{{vm_name}}.xz"
+    vm_rootdisk: "{{vm_rootdisk_folder}}/{{vm_name}}"
     vm_size: "32G"
     vm_memory: "2048"
-    vm_config: "{{vm_libvirt}}/{{vm_name}}/cloud-init.cfg"
-    vm_config_iso: "{{vm_libvirt}}/{{vm_name}}/cloud-init.iso"
-    vm_cpus: 2
-    vm_maxcpus: 4
+    vm_cpus: 4
     vm_xml: "/etc/libvirt/qemu/{{vm_name}}.xml"
     # vm_ip: 10.0.0.97 Not used: we are currently using DHCP on the bridge network
     vm_host_ip: 10.0.0.98 # TODO: kan uit ansible gehaald worden
@@ -86,9 +83,8 @@
       shell: "virsh undefine {{vm_name}} --nvram"
       ignore_errors: yes
       listen: Nuke the VM
-    - name: Convert the OS image
-      shell:
-        cmd: "qemu-img convert -f qcow2 -O qcow2 {{vm_image}} {{vm_rootdisk}}"
+    - name: Unpack the OS image
+      shell: "unxz {{vm_image}}"
       listen: Nuke the VM
     - name: Resize the OS image
       shell:
@@ -96,7 +92,7 @@
       listen: Nuke the VM
     - name: Install/import the OS into a VM
       shell:
-        cmd: "virt-install --name {{vm_name}} --memory {{vm_memory}} --vcpus={{vm_cpus}},maxvcpus={{vm_maxcpus}} --disk {{vm_rootdisk}},device=disk,bus=virtio --check path_in_use=off --disk {{vm_config_iso}},device=cdrom --os-type linux --os-variant debian10 --virt-type kvm --graphics none --network bridge=br0,trustGuestRxFilters=\"yes\" --import --noautoconsole --autostart"
+        cmd: "virt-install --name {{vm_name}} --memory {{vm_memory}} --vcpus={{vm_cpus}} --disk {{vm_rootdisk}},device=disk,bus=virtio --check path_in_use=off --os-type linux --os-variant debian10 --virt-type kvm --graphics none --network bridge=br0,trustGuestRxFilters=\"yes\" --import --noautoconsole --autostart --boot uefi --hostdev 0x10c4:0xea60 --events on_crash=restart,on_reboot=restart"
       listen: Nuke the VM
       
   tasks:
@@ -111,7 +107,6 @@
         state: directory
         path: "{{item}}"
       loop:
-        - "{{vm_dir}}"
         - "/var/lib/libvirt/templates"
         - "/var/lib/libvirt/images"
         - "/var/lib/libvirt/{{vm_name}}"
@@ -120,16 +115,7 @@
         dest: "{{vm_image}}"
         url: "{{vm_image_url}}"
       notify: Nuke the VM
-    - name: Create the configuration file
-      template:
-        src: "cloud-init.cfg"
-        dest: "{{vm_config}}"
-      register: cloud_init_file
-      notify: Nuke the VM
-    - name: Convert the configuration file
-      when: cloud_init_file is changed
-      shell:
-        cmd: "cloud-localds {{vm_config_iso}} {{vm_config}}"
+        
 
     # Network configuration (brigded) following https://jamielinux.com/docs/libvirt-networking-handbook/bridged-network.html
     # host MAC address can be found using: ansible_default_ipv4.macaddress
@@ -159,9 +145,7 @@
       # Handlers should run here
     - name: Trigger a VM nuke if required
       meta: flush_handlers
-    - name: Start the VM
-      shell: "virsh start {{vm_name}}"
-  
+
 - name: Finalize with sudo rights
   remote_user: pragtich
   hosts: [neo2, blue]
